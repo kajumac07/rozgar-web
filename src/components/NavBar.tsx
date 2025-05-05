@@ -1,64 +1,182 @@
-import React from "react";
-import { Menu, LogIn, UserPlus } from "lucide-react";
+"use client";
+
+import React, { useState } from "react";
+import {
+  Menu,
+  X,
+  LogIn,
+  UserPlus,
+  Search,
+  Briefcase,
+  Compass,
+  FileText,
+  Mail,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function NavBar() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
-    <nav className="bg-gradient-to-r from-blue-50 via-white to-blue-50 shadow-lg py-4 px-8">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Logo */}
-        <div className="text-3xl font-extrabold text-blue-700 tracking-wide">
-          Rozgar
+    <>
+      <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <div className="flex-shrink-0 flex items-center">
+              <div className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 tracking-tight">
+                Rozgar
+              </div>
+            </div>
+
+            {/* Desktop Menu Items */}
+            <div className="hidden md:flex items-center space-x-8">
+              <div className="relative">
+                <a
+                  href="/"
+                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 group"
+                >
+                  <span className="relative">
+                    Home
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
+                  </span>
+                </a>
+              </div>
+              <div className="relative">
+                <a
+                  href="/jobs"
+                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 group flex items-center gap-1"
+                >
+                  <Briefcase size={16} />
+                  <span className="relative">
+                    Jobs
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
+                  </span>
+                </a>
+              </div>
+              <div className="relative">
+                <a
+                  href="/explore"
+                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 group flex items-center gap-1"
+                >
+                  <Compass size={16} />
+                  <span className="relative">
+                    Explore
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
+                  </span>
+                </a>
+              </div>
+              <div className="relative">
+                <a
+                  href="/blog"
+                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 group flex items-center gap-1"
+                >
+                  <FileText size={16} />
+                  <span className="relative">
+                    Blog
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
+                  </span>
+                </a>
+              </div>
+              <div className="relative">
+                <a
+                  href="/contact"
+                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 group flex items-center gap-1"
+                >
+                  <Mail size={16} />
+                  <span className="relative">
+                    Contact
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
+                  </span>
+                </a>
+              </div>
+            </div>
+
+            {/* Search and Auth Buttons */}
+            <div className="hidden md:flex items-center gap-4">
+              <button className="flex items-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-full hover:bg-blue-50 transition-all duration-200 shadow-sm">
+                <LogIn size={16} />
+                <span>Login</span>
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md">
+                <UserPlus size={16} />
+                <span>Register</span>
+              </button>
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-blue-600 focus:outline-none"
+              >
+                {mobileMenuOpen ? (
+                  <X size={24} className="text-blue-600" />
+                ) : (
+                  <Menu size={24} className="text-blue-600" />
+                )}
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Menu Items */}
-        <div className="hidden md:flex gap-10 text-lg font-medium text-gray-700">
-          <a
-            href="/"
-            className="hover:text-blue-600 transition-colors duration-200"
-          >
-            Home
-          </a>
-          <a
-            href="/jobs"
-            className="hover:text-blue-600 transition-colors duration-200"
-          >
-            Job
-          </a>
-          <a
-            href="/explore"
-            className="hover:text-blue-600 transition-colors duration-200"
-          >
-            Explore
-          </a>
-          <a
-            href="/blog"
-            className="hover:text-blue-600 transition-colors duration-200"
-          >
-            Blog
-          </a>
-          <a
-            href="/contact"
-            className="hover:text-blue-600 transition-colors duration-200"
-          >
-            Contact
-          </a>
-        </div>
-
-        {/* Auth Buttons */}
-        <div className="flex gap-3 items-center">
-          <button className="flex items-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-full hover:bg-blue-100 transition-all">
-            <LogIn size={18} /> Login
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-all">
-            <UserPlus size={18} /> Register
-          </button>
-        </div>
-
-        {/* Mobile Menu Icon */}
-        <div className="md:hidden">
-          <Menu size={24} className="text-blue-600" />
-        </div>
-      </div>
-    </nav>
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-200">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              <a
+                href="/"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50  items-center gap-2"
+              >
+                <Briefcase size={16} />
+                Home
+              </a>
+              <a
+                href="/jobs"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 items-center gap-2"
+              >
+                <Briefcase size={16} />
+                Jobs
+              </a>
+              <a
+                href="/explore"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 items-center gap-2"
+              >
+                <Compass size={16} />
+                Explore
+              </a>
+              <a
+                href="/blog"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50  items-center gap-2"
+              >
+                <FileText size={16} />
+                Blog
+              </a>
+              <a
+                href="/contact"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50  items-center gap-2"
+              >
+                <Mail size={16} />
+                Contact
+              </a>
+              <div className="pt-4 pb-2 border-t border-gray-200">
+                <div className="flex items-center gap-3">
+                  <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-full hover:bg-blue-50">
+                    <LogIn size={16} />
+                    Login
+                  </button>
+                  <Link href="/register">
+                    <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-700 hover:to-indigo-700">
+                      <UserPlus size={16} />
+                      Register
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
+    </>
   );
 }
