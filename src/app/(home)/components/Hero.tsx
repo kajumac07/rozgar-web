@@ -2,7 +2,7 @@ import React from "react";
 
 export default function HeroSectionComp() {
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-white">
+    <div className="min-h-[70vh] flex items-center justify-center bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center">
           <h1 className="text-5xl md:text-7xl font-bold text-blue-600 mb-4">
