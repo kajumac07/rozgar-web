@@ -2,23 +2,44 @@
 
 Rozgar is a comprehensive job portal built with Next.js that connects employers with potential candidates. The platform provides an intuitive interface for job posting, job searching, and career development.
 
+## Screenshots
+
+![Hero Section](./public/screenshots/hero.png)
+_Landing page with resume upload and analysis functionality_
+
+![Job Categories](./public/screenshots/categories.png)
+_Browse and filter jobs by industry categories_
+
+![Discover](./public/screenshots/discover.png)
+_Explore curated job recommendations_
+
+![Job Listings](./public/screenshots/job_listenings.png)
+_Latest job postings with advanced search and filtering_
+
+![Footer](./public/screenshots/footer_discover.png)
+_Additional job discovery and navigation options_
+
 ## Features
 
 - Modern and responsive UI built with Next.js 14
-- Job posting and management for employers
-- Advanced job search and filtering for candidates
-- Company profiles and candidate portfolios
-- Built-in messaging system
-- Mobile-friendly design
+- Seamless job posting and management for employers
+- Advanced job search with multiple filtering options
+- Detailed company profiles and candidate portfolios
+- Real-time messaging system between employers and candidates
+- Fully responsive mobile-friendly design
+- AI-powered resume parsing and analysis
+- Personalized job recommendations based on skills
 
 ## Tech Stack
 
-- Next.js 14
-- TypeScript
-- Tailwind CSS
-- React
-- Next Auth
-- MongoDB
+- Next.js 14 (App Router)
+- TypeScript for type safety
+- Tailwind CSS for styling
+- React for UI components
+- NextAuth.js for authentication
+- MongoDB for database
+- Resume Parser API for document analysis
+- WebSocket for real-time notifications
 
 ## Getting Started
 
