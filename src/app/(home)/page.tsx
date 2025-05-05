@@ -1,3 +1,9 @@
+import HeroSectionComp from "./components/Hero";
+
 export default function Home() {
-  return <div>My Home Screen</div>;
+  return (
+    <div>
+      <HeroSectionComp />
+    </div>
+  );
 }
