@@ -11,6 +11,7 @@ import {
   Compass,
   FileText,
   Mail,
+  PersonStanding,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -23,16 +24,17 @@ export default function NavBar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <div className="flex-shrink-0 flex items-center">
-              <div className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 tracking-tight">
-                Rozgar
+            <Link href="/">
+              <div className="flex-shrink-0 flex items-center">
+                <div className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 tracking-tight">
+                  Rozgar
+                </div>
               </div>
-            </div>
-
+            </Link>
             {/* Desktop Menu Items */}
             <div className="hidden md:flex items-center space-x-8">
               <div className="relative">
-                <a
+                <Link
                   href="/"
                   className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 group"
                 >
@@ -40,7 +42,7 @@ export default function NavBar() {
                     Home
                     <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
                   </span>
-                </a>
+                </Link>
               </div>
               <div className="relative">
                 <a
@@ -89,6 +91,19 @@ export default function NavBar() {
                     <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
                   </span>
                 </a>
+              </div>
+
+              <div className="relative">
+                <Link
+                  href="/admin"
+                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 group flex items-center gap-1"
+                >
+                  <PersonStanding size={16} />
+                  <span className="relative">
+                    Admin
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
+                  </span>
+                </Link>
               </div>
             </div>
 

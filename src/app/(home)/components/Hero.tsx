@@ -124,6 +124,7 @@ export default function HeroSectionComp() {
                   <select className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 appearance-none bg-white">
                     <option value="">Job Category</option>
                     <option value="tech">Technology</option>
+                    <option value="teacher">Teacher</option>
                     <option value="marketing">Marketing</option>
                     <option value="design">Design</option>
                     <option value="sales">Sales</option>
@@ -147,10 +148,10 @@ export default function HeroSectionComp() {
                   </div>
                   <select className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 appearance-none bg-white">
                     <option value="">Location</option>
-                    <option value="remote">Remote</option>
-                    <option value="us">United States</option>
-                    <option value="uk">United Kingdom</option>
-                    <option value="eu">Europe</option>
+                    <option value="mohali">Mohali</option>
+                    <option value="chandigarh">Chandigarh</option>
+                    <option value="delhi">Delhi</option>
+                    <option value="pune">Pune</option>
                   </select>
                 </div>
 

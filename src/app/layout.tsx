@@ -4,6 +4,7 @@ import "./globals.css";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import { Toaster } from "react-hot-toast";
+import AuthContextProvider from "@/contexts/AuthContexts";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rozgar",
+  title: "Rozgaar",
   description: "Created by Team Mylex",
 };
 
@@ -30,10 +31,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Toaster></Toaster>
-        <NavBar />
-        {children}
-        <Footer />
+        <AuthContextProvider>
+          <Toaster />
+          <NavBar />
+          {children}
+          <Footer />
+        </AuthContextProvider>
       </body>
     </html>
   );
