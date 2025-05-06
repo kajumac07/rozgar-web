@@ -3,6 +3,11 @@
 import React, { useState, useRef } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import Head from "next/head";
+import { useAuth } from "@/contexts/AuthContexts";
+import { useRouter } from "next/navigation";
+import { storage, db } from "@/lib/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { collection, addDoc, doc, getDoc } from "firebase/firestore";
 
 type SelectedFile = {
   name: string;
@@ -14,6 +19,9 @@ export default function HeroSectionComp() {
   const [selectedFile, setSelectedFile] = useState<SelectedFile>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+
+  const { user } = useAuth() || { user: null };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -46,11 +54,15 @@ export default function HeroSectionComp() {
   };
 
   const handleUploadClick = () => {
+    if (!user) {
+      router.push("/register");
+      return;
+    }
     fileInputRef.current?.click();
   };
 
   const handleSubmit = async () => {
-    if (!selectedFile) {
+    if (!selectedFile || !user) {
       toast.error("Please select a file first");
       return;
     }
@@ -59,13 +71,34 @@ export default function HeroSectionComp() {
     toast.loading("Uploading your resume...");
 
     try {
-      // Simulate API upload (replace with actual API call)
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Get the actual file from input
+      const file = fileInputRef.current?.files?.[0];
+      if (!file) throw new Error("No file selected");
+
+      // Upload file to Firebase Storage
+      const storageRef = ref(storage, `resumes/${user.uid}/${file.name}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+
+      // Get user's name from Users collection
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const userName = userDoc.data()?.name || "Unknown";
+
+      // Save resume details to Resumes collection
+      await addDoc(collection(db, "resumes"), {
+        id: user.uid,
+        userName: userName,
+        pdfUrl: downloadURL,
+        createdAt: new Date().toISOString(),
+        userId: user.uid,
+        docId: file.name,
+      });
 
       toast.dismiss();
       toast.success("Resume uploaded successfully!");
       setSelectedFile(null);
     } catch (error) {
+      console.error("Error uploading resume:", error);
       toast.dismiss();
       toast.error("Failed to upload resume");
     } finally {

@@ -23,16 +23,11 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const checkAdminAndFetchResumes = async () => {
-      if (!user) {
-        router.push("/admin/login");
-        return;
-      }
-
       try {
         // Check if user is admin
         const userDoc = await getDocs(collection(db, "Users"));
         const adminUser = userDoc.docs.find(
-          (doc) => doc.id === user.uid && doc.data().isAdmin === true
+          (doc) => doc.id === user?.uid && doc.data().isAdmin === true
         );
 
         if (!adminUser) {
@@ -42,6 +37,7 @@ export default function AdminDashboard() {
         }
 
         setIsAdmin(true);
+        router.push("/admin");
 
         // Fetch resumes if user is admin
         const resumesSnapshot = await getDocs(collection(db, "resumes"));
@@ -73,11 +69,6 @@ export default function AdminDashboard() {
     );
   }
 
-  if (!user) {
-    router.push("/admin/login");
-    return null;
-  }
-
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -90,7 +81,9 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Resume Management Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-8 text-black">
+        Resume Management Dashboard
+      </h1>
 
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">

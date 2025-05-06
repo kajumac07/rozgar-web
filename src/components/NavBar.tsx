@@ -12,11 +12,29 @@ import {
   FileText,
   Mail,
   PersonStanding,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContexts";
+import { useRouter } from "next/navigation";
+import { auth } from "@/lib/firebase";
+import toast from "react-hot-toast";
 
 export default function NavBar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useAuth() || { user: null };
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      toast.success("Logged out successfully");
+      router.push("/login");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      toast.error("Error logging out");
+    }
+  };
 
   return (
     <>
@@ -109,14 +127,33 @@ export default function NavBar() {
 
             {/* Search and Auth Buttons */}
             <div className="hidden md:flex items-center gap-4">
-              <button className="flex items-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-full hover:bg-blue-50 transition-all duration-200 shadow-sm">
-                <LogIn size={16} />
-                <span>Login</span>
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md">
-                <UserPlus size={16} />
-                <span>Register</span>
-              </button>
+              {user ? (
+                <div className="flex items-center gap-4">
+                  <span className="text-gray-700">{user.email}</span>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-full hover:bg-blue-50 transition-all duration-200 shadow-sm"
+                  >
+                    <LogOut size={16} />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <button className="flex items-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-full hover:bg-blue-50 transition-all duration-200 shadow-sm">
+                      <LogIn size={16} />
+                      <span>Login</span>
+                    </button>
+                  </Link>
+                  <Link href="/register">
+                    <button className="flex items-center gap-2 px-4 py-2 text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md">
+                      <UserPlus size={16} />
+                      <span>Register</span>
+                    </button>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile menu button */}
@@ -176,16 +213,33 @@ export default function NavBar() {
               </a>
               <div className="pt-4 pb-2 border-t border-gray-200">
                 <div className="flex items-center gap-3">
-                  <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-full hover:bg-blue-50">
-                    <LogIn size={16} />
-                    Login
-                  </button>
-                  <Link href="/register">
-                    <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-700 hover:to-indigo-700">
-                      <UserPlus size={16} />
-                      Register
-                    </button>
-                  </Link>
+                  {user ? (
+                    <>
+                      <span className="text-gray-700">{user.email}</span>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-full hover:bg-blue-50"
+                      >
+                        <LogOut size={16} />
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/login">
+                        <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-full hover:bg-blue-50">
+                          <LogIn size={16} />
+                          Login
+                        </button>
+                      </Link>
+                      <Link href="/register">
+                        <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-700 hover:to-indigo-700">
+                          <UserPlus size={16} />
+                          Register
+                        </button>
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
