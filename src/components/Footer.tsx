@@ -24,7 +24,7 @@ export default function Footer() {
           {/* Logo and Contact */}
           <div className="lg:col-span-2">
             <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-600 mb-4">
-              Rozgar
+              Rozgaar
             </div>
             <p className="text-gray-400 mb-6 max-w-sm">
               Connecting talented professionals with world-class companies to
@@ -32,7 +32,7 @@ export default function Footer() {
             </p>
             <div className="flex items-center gap-3 text-gray-300 mb-2">
               <Mail size={18} className="text-blue-400" />
-              <span>contact@rozgar.com</span>
+              <span>contact@rozgaar.com</span>
             </div>
           </div>
 
@@ -169,7 +169,7 @@ export default function Footer() {
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="text-gray-500 text-sm mb-4 md:mb-0">
-            © {new Date().getFullYear()} Rozgar. All rights reserved.
+            © {new Date().getFullYear()} Rozgaar. All rights reserved.
           </div>
 
           <div className="flex space-x-4">

@@ -45,7 +45,7 @@ export default function NavBar() {
             <Link href="/">
               <div className="flex-shrink-0 flex items-center">
                 <div className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 tracking-tight">
-                  Rozgar
+                  Rozgaar
                 </div>
               </div>
             </Link>
