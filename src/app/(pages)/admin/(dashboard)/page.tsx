@@ -22,44 +22,114 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    const checkAdminAndFetchResumes = async () => {
+    console.log("Initializing Admin Dashboard check...");
+
+    const checkAdminStatus = async () => {
+      if (!user) {
+        console.log("No user found, redirecting...");
+        setIsAdmin(false);
+        setLoading(false);
+        return;
+      }
+
       try {
-        // Check if user is admin
+        console.log("Checking admin status for user:", user.uid);
         const userDoc = await getDocs(collection(db, "Users"));
         const adminUser = userDoc.docs.find(
-          (doc) => doc.id === user?.uid && doc.data().isAdmin === true
+          (doc) => doc.id === user.uid && doc.data().isAdmin === true
         );
 
         if (!adminUser) {
+          console.log("User is not an admin:", user.uid);
           setIsAdmin(false);
           setLoading(false);
           return;
         }
 
+        console.log("User is admin:", user.uid);
         setIsAdmin(true);
-        router.push("/admin");
-
-        // Fetch resumes if user is admin
-        const resumesSnapshot = await getDocs(collection(db, "resumes"));
-        const resumesData = resumesSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          userName: doc.data().userName || "Unknown",
-          pdfUrl: doc.data().pdfUrl || "",
-          createdAt:
-            doc.data().createdAt?.toDate().toLocaleDateString() ||
-            "Unknown Date",
-        }));
-
-        setResumes(resumesData);
-        setLoading(false);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error checking admin status:", error);
+        setIsAdmin(false);
         setLoading(false);
       }
     };
 
-    checkAdminAndFetchResumes();
-  }, [user, router]);
+    // const fetchResumes = async () => {
+    //   try {
+    //     console.log("Fetching resumes...");
+    //     const resumesSnapshot = await getDocs(collection(db, "resumes"));
+    //     const resumesData = resumesSnapshot.docs.map((doc) => ({
+    //       id: doc.id,
+    //       userName: doc.data().userName || "Unknown",
+    //       pdfUrl: doc.data().pdfUrl || "",
+    //       createdAt:
+    //         doc.data().createdAt?.toDate().toLocaleDateString() ||
+    //         "Unknown Date",
+    //     }));
+
+    //     console.log("Fetched resumes count:", resumesData.length);
+    //     setResumes(resumesData);
+    //   } catch (error) {
+    //     console.error("Error fetching resumes:", error);
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+
+    const fetchResumes = async () => {
+      try {
+        console.log("Fetching resumes...");
+        const resumesSnapshot = await getDocs(collection(db, "resumes"));
+        const resumesData = resumesSnapshot.docs.map((doc) => {
+          const data = doc.data();
+          let createdAt = "Unknown Date";
+
+          // Handle different possible date formats
+          if (data.createdAt) {
+            if (typeof data.createdAt.toDate === "function") {
+              // It's a Firestore Timestamp
+              createdAt = data.createdAt.toDate().toLocaleDateString();
+            } else if (data.createdAt.seconds) {
+              // It might be a timestamp in seconds
+              createdAt = new Date(
+                data.createdAt.seconds * 1000
+              ).toLocaleDateString();
+            } else if (typeof data.createdAt === "string") {
+              // It might be an ISO string
+              createdAt = new Date(data.createdAt).toLocaleDateString();
+            }
+          }
+
+          return {
+            id: doc.id,
+            userName: data.userName || "Unknown",
+            pdfUrl: data.pdfUrl || "",
+            createdAt,
+          };
+        });
+
+        console.log("Fetched resumes count:", resumesData.length);
+        setResumes(resumesData);
+      } catch (error) {
+        console.error("Error fetching resumes:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const initializeDashboard = async () => {
+      await checkAdminStatus();
+
+      if (isAdmin) {
+        await fetchResumes();
+      } else {
+        setLoading(false);
+      }
+    };
+
+    initializeDashboard();
+  }, [user, isAdmin]);
 
   if (loading) {
     return (
