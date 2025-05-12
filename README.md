@@ -36,10 +36,8 @@ _Additional job discovery and navigation options_
 - TypeScript for type safety
 - Tailwind CSS for styling
 - React for UI components
-- NextAuth.js for authentication
-- MongoDB for database
-- Resume Parser API for document analysis
-- WebSocket for real-time notifications
+- FirebaseAuth for authentication
+- Firebase Firestore for database
 
 ## Getting Started
 
