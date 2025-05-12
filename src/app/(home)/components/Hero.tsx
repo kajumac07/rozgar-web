@@ -80,9 +80,21 @@ export default function HeroSectionComp() {
       const snapshot = await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(snapshot.ref);
 
-      // Get user's name from Users collection
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      const userName = userDoc.data()?.name || "Unknown";
+      // Get user's name from Users collection - with better error handling
+      let userName = "Unknown";
+      try {
+        const userDoc = await getDoc(doc(db, "Users", user.uid));
+        if (userDoc.exists()) {
+          userName = userDoc.data()?.name || "Unknown";
+          console.log("User document data:", userDoc.data()); // Debugging
+        } else {
+          console.warn("User document doesn't exist"); // Debugging
+        }
+      } catch (userDocError) {
+        console.error("Error fetching user document:", userDocError);
+      }
+
+      console.log("Pdf uploaded by UserName is ", userName);
 
       // Save resume details to Resumes collection
       await addDoc(collection(db, "resumes"), {
