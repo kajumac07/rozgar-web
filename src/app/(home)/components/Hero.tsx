@@ -142,11 +142,29 @@ export default function HeroSectionComp() {
                 Land Your Dream Job
               </span>
             </h1>
-            <p className="text-xl md:text-2xl lg:text-3xl text-gray-700 mb-10 max-w-3xl mx-auto leading-relaxed">
-              Discover{" "}
-              <span className="font-semibold text-blue-600">10,000+</span>{" "}
-              exciting opportunities and accelerate your career growth
-            </p>
+            <div className="text-gray-800 text-lg md:text-xl lg:text-2xl max-w-4xl mx-auto leading-relaxed space-y-6">
+              <p>
+                <span className="font-semibold text-blue-600">
+                  Access to Jobs & Services:
+                </span>{" "}
+                <br />
+                Only <span className="font-medium">registered members</span> can
+                search for jobs and access our full range of services designed
+                to help you grow professionally.
+              </p>
+              <p>
+                <span className="font-semibold text-green-600">
+                  Not a member yet?
+                </span>{" "}
+                <br />
+                Simply{" "}
+                <span className="underline decoration-dotted">
+                  upload your resume
+                </span>
+                , and we'll get in touch when we find opportunities that match
+                your profile and career goals.
+              </p>
+            </div>
 
             {/* Search box */}
             <div className="bg-white p-6 rounded-2xl shadow-xl max-w-5xl mx-auto border border-gray-100 transform transition-all hover:shadow-2xl">
