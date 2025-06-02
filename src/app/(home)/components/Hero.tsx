@@ -144,7 +144,7 @@ export default function HeroSectionComp() {
             </h1>
             <div className="text-gray-800 text-lg md:text-xl lg:text-2xl max-w-4xl mx-auto leading-relaxed space-y-6">
               <p>
-                <span className="font-semibold text-blue-600">
+                <span className="font-semibold text-green-600">
                   Access to Jobs & Services:
                 </span>{" "}
                 <br />
@@ -153,7 +153,7 @@ export default function HeroSectionComp() {
                 to help you grow professionally.
               </p>
               <p>
-                <span className="font-semibold text-green-600">
+                <span className="font-semibold text-red-600">
                   Not a member yet?
                 </span>{" "}
                 <br />
