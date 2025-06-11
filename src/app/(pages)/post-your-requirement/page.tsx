@@ -4,8 +4,10 @@ import React, { useState } from "react";
 import { db } from "@/lib/firebase";
 import { addDoc, collection, Timestamp } from "firebase/firestore";
 import { toast } from "react-hot-toast";
+import { useAuth } from "@/contexts/AuthContexts";
 
 export default function PostRequirementPage() {
+  const { user } = useAuth() || { user: null };
   const [form, setForm] = useState({
     jobType: "FullTime",
     jobTitle: "",
@@ -26,6 +28,7 @@ export default function PostRequirementPage() {
     contactPersonProfile: "",
     jobAddress: "",
     agree: false,
+    uid: user?.uid || "",
   });
 
   const handleChange = (
@@ -75,6 +78,7 @@ export default function PostRequirementPage() {
         contactPersonProfile: "",
         jobAddress: "",
         agree: false,
+        uid: user?.uid || "",
       });
     } catch (error) {
       toast.error("Failed to post job.");
