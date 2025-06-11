@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { db } from "@/lib/firebase";
-import { addDoc, collection, Timestamp } from "firebase/firestore";
+import { setDoc, collection, Timestamp, doc } from "firebase/firestore";
 import { toast } from "react-hot-toast";
 import { useAuth } from "@/contexts/AuthContexts";
 
@@ -29,6 +29,7 @@ export default function PostRequirementPage() {
     jobAddress: "",
     agree: false,
     uid: user?.uid || "",
+    jobId: "",
   });
 
   const handleChange = (
@@ -44,6 +45,49 @@ export default function PostRequirementPage() {
     }));
   };
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!form.agree) {
+  //     toast.error("You must agree to the terms and conditions.");
+  //     return;
+  //   }
+
+  //   try {
+  //     await addDoc(collection(db, "JobRequirements"), {
+  //       ...form,
+  //       createdAt: Timestamp.now(),
+  //     });
+
+  //     toast.success("Job requirement posted successfully!");
+  //     setForm({
+  //       jobType: "FullTime",
+  //       jobTitle: "",
+  //       jobLocation: "",
+  //       openings: "",
+  //       requiredQualification: "",
+  //       experienceRequired: "",
+  //       monthlySalary: "",
+  //       bonus: "",
+  //       jobDescription: "",
+  //       skillsRequired: "",
+  //       jobTiming: "",
+  //       interviewTime: "",
+  //       companyName: "",
+  //       contactPersonName: "",
+  //       phoneNumber: "",
+  //       email: "",
+  //       contactPersonProfile: "",
+  //       jobAddress: "",
+  //       agree: false,
+  //       uid: user?.uid || "",
+  //       jobId: "",
+  //     });
+  //   } catch (error) {
+  //     toast.error("Failed to post job.");
+  //     console.error(error);
+  //   }
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.agree) {
@@ -52,8 +96,12 @@ export default function PostRequirementPage() {
     }
 
     try {
-      await addDoc(collection(db, "JobRequirements"), {
+      const newDocRef = doc(collection(db, "JobRequirements"));
+      const jobId = newDocRef.id;
+
+      await setDoc(newDocRef, {
         ...form,
+        jobId,
         createdAt: Timestamp.now(),
       });
 
@@ -79,6 +127,7 @@ export default function PostRequirementPage() {
         jobAddress: "",
         agree: false,
         uid: user?.uid || "",
+        jobId: "",
       });
     } catch (error) {
       toast.error("Failed to post job.");

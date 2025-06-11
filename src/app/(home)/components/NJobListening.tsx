@@ -1,37 +1,45 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { JobRequirement } from "@/types/job_types";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useAuth } from "@/contexts/AuthContexts";
 
 export default function NewJobListingComponent() {
-  const jobs = [
-    {
-      id: 1,
-      title: "Developer & Expert in Java/C++",
-      type: "Full-time",
-      company: "Google",
-      location: "Madrid, Spain",
-      posted: "2 days ago",
-      logo: "/google.png",
-    },
-    {
-      id: 2,
-      title: "Animator & Expert in Maya 3D",
-      type: "Part-time",
-      company: "Pinterest",
-      location: "Barcelona, Spain",
-      posted: "1 week ago",
-      logo: "/pinterest.png",
-    },
-    {
-      id: 3,
-      title: "Marketing Specialist in SEO & SMM",
-      type: "Full-time",
-      company: "Slack",
-      location: "Valencia, Spain",
-      posted: "3 days ago",
-      logo: "/slack.png",
-    },
-  ];
+  const [jobs, setJobs] = useState<JobRequirement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth() || { user: null };
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      const jobsSnapshot = await getDocs(collection(db, "JobRequirements"));
+      const jobsData = jobsSnapshot.docs.map(
+        (doc) => doc.data() as JobRequirement
+      );
+      setJobs(jobsData);
+      setLoading(false);
+    };
+    fetchJobs();
+  }, []);
+
+  if (user == null) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-2xl font-bold">Please login to view jobs</div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <section className="py-16 bg-gray-50">
@@ -69,23 +77,20 @@ export default function NewJobListingComponent() {
         <div className="grid grid-cols-1 gap-6">
           {jobs.map((job) => (
             <div
-              key={job.id}
+              key={job.jobId}
               className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100"
             >
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-                    <Image
-                      src={job.logo}
-                      alt={`${job.company} logo`}
-                      width={56}
-                      height={56}
-                      className="object-contain"
-                    />
+                  <div className="w-14 h-14 bg-blue-600 rounded-lg flex items-center justify-center overflow-hidden">
+                    <span className="text-xl font-bold text-white">
+                      {job.jobTitle.charAt(0).toUpperCase()}
+                    </span>
                   </div>
+
                   <div>
                     <h3 className="text-xl font-bold text-gray-900 mb-1">
-                      {job.title}
+                      {job.jobTitle}
                     </h3>
                     <div className="flex flex-wrap items-center gap-4 text-gray-600 mb-2">
                       <span className="flex items-center gap-1">
@@ -102,7 +107,7 @@ export default function NewJobListingComponent() {
                           />
                           <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" />
                         </svg>
-                        {job.company}
+                        {job.companyName}
                       </span>
                       <span className="flex items-center gap-1">
                         <svg
@@ -117,7 +122,7 @@ export default function NewJobListingComponent() {
                             clipRule="evenodd"
                           />
                         </svg>
-                        {job.location}
+                        {job.jobLocation}
                       </span>
                       <span className="flex items-center gap-1">
                         <svg
@@ -132,17 +137,17 @@ export default function NewJobListingComponent() {
                             clipRule="evenodd"
                           />
                         </svg>
-                        {job.posted}
+                        {job.createdAt.toDate().toLocaleDateString()}
                       </span>
                     </div>
                     <span
                       className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                        job.type === "Full-time"
-                          ? "bg-blue-100 text-blue-800"
+                        job.jobType === "FullTime"
+                          ? "bg-blue-100 text-red-800"
                           : "bg-purple-100 text-purple-800"
                       }`}
                     >
-                      {job.type}
+                      {job.jobType}
                     </span>
                   </div>
                 </div>
