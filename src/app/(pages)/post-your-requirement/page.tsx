@@ -162,6 +162,10 @@ export default function PostRequirementPage() {
             >
               <option value="FullTime">Full Time</option>
               <option value="PartTime">Part Time</option>
+              <option value="Contractual">Contractual</option>
+              <option value="Freelance">Freelance</option>
+              <option value="Internship">Internship</option>
+              <option value="WFH">Work From Home</option>
             </select>
           </div>
 
