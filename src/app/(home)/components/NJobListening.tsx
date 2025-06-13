@@ -3,43 +3,83 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { JobRequirement } from "@/types/job_types";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContexts";
+
+// Dummy jobs data for non-logged in users
+const DUMMY_JOBS = [
+  {
+    jobId: "dummy1",
+    jobTitle: "Software Engineer",
+    companyName: "Tech Company Inc",
+    jobLocation: "Remote",
+    jobType: "FullTime",
+    createdAt: new Date() as any,
+    description: "Join our team as a software engineer",
+  },
+  {
+    jobId: "dummy2",
+    jobTitle: "Product Manager",
+    companyName: "Product Corp",
+    jobLocation: "New York",
+    jobType: "FullTime",
+    createdAt: new Date() as any,
+    description: "Lead our product team",
+  },
+];
 
 export default function NewJobListingComponent() {
   const [jobs, setJobs] = useState<JobRequirement[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth() || { user: null };
+  const router = useRouter();
 
   useEffect(() => {
     const fetchJobs = async () => {
-      const jobsSnapshot = await getDocs(collection(db, "JobRequirements"));
+      const jobsRef = collection(db, "JobRequirements");
+      const q = query(jobsRef, where("agree", "==", true));
+      const jobsSnapshot = await getDocs(q);
       const jobsData = jobsSnapshot.docs.map(
         (doc) => doc.data() as JobRequirement
       );
       setJobs(jobsData);
       setLoading(false);
     };
+
     fetchJobs();
   }, []);
 
-  if (user == null) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-2xl font-bold">Please login to view jobs</div>
-      </div>
-    );
-  }
+  const handleJobClick = (jobId: string) => {
+    if (!user) {
+      // Redirect to login if not authenticated
+      router.push("/login");
+      return;
+    }
+  };
 
-  if (loading) {
+  const handleApplyClick = (jobId: string, jobTitle: string) => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    // Redirect to application form with job details
+    router.push(
+      `/jobs/apply?jobId=${jobId}&jobTitle=${encodeURIComponent(jobTitle)}`
+    );
+  };
+
+  if (loading && user) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
       </div>
     );
   }
+
+  const jobsToDisplay = user ? jobs : DUMMY_JOBS;
 
   return (
     <section className="py-16 bg-gray-50">
@@ -75,10 +115,11 @@ export default function NewJobListingComponent() {
         </div>
 
         <div className="grid grid-cols-1 gap-6">
-          {jobs.map((job) => (
+          {jobsToDisplay.map((job) => (
             <div
               key={job.jobId}
               className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100"
+              onClick={() => handleJobClick(job.jobId)}
             >
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-start gap-4">
@@ -137,7 +178,11 @@ export default function NewJobListingComponent() {
                             clipRule="evenodd"
                           />
                         </svg>
-                        {job.createdAt.toDate().toLocaleDateString()}
+                        {job.createdAt &&
+                        typeof job.createdAt === "object" &&
+                        "toDate" in job.createdAt
+                          ? job.createdAt.toDate().toLocaleDateString()
+                          : new Date().toLocaleDateString()}
                       </span>
                     </div>
                     <span
@@ -151,7 +196,13 @@ export default function NewJobListingComponent() {
                     </span>
                   </div>
                 </div>
-                <button className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                <button
+                  className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleApplyClick(job.jobId, job.jobTitle);
+                  }}
+                >
                   Apply Now
                 </button>
               </div>

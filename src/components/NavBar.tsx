@@ -74,7 +74,7 @@ export default function NavBar() {
                   </span>
                 </a>
               </div>
-              <div className="relative">
+              {/* <div className="relative">
                 <a
                   href="/explore"
                   className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 group flex items-center gap-1"
@@ -109,7 +109,7 @@ export default function NavBar() {
                     <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
                   </span>
                 </a>
-              </div>
+              </div> */}
 
               <div className="relative">
                 <Link

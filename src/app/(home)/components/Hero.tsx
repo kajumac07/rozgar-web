@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import Head from "next/head";
 import { useAuth } from "@/contexts/AuthContexts";
@@ -9,6 +9,7 @@ import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, addDoc, doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
+import { UserDetails } from "@/types/userDetails";
 
 type SelectedFile = {
   name: string;
@@ -18,6 +19,7 @@ type SelectedFile = {
 
 export default function HeroSectionComp() {
   const [selectedFile, setSelectedFile] = useState<SelectedFile>(null);
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -59,12 +61,29 @@ export default function HeroSectionComp() {
       router.push("/register");
       return;
     }
+
+    // Check if user is an employer
+    if (userDetails?.accountType === "employer") {
+      toast.error(
+        "Employers cannot upload resumes. Please use a job seeker account."
+      );
+      return;
+    }
+
     fileInputRef.current?.click();
   };
 
   const handleSubmit = async () => {
     if (!selectedFile || !user) {
       toast.error("Please select a file first");
+      return;
+    }
+
+    // Additional check for employer trying to upload resume
+    if (userDetails?.accountType === "employer") {
+      toast.error(
+        "Employer accounts cannot upload resumes. Please use a job seeker account."
+      );
       return;
     }
 
@@ -118,6 +137,23 @@ export default function HeroSectionComp() {
       setIsUploading(false);
     }
   };
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, "Users", user.uid));
+          if (userDoc.exists()) {
+            setUserDetails(userDoc.data() as UserDetails);
+          }
+        } catch (error) {
+          console.error("Error fetching user details:", error);
+        }
+      }
+    };
+
+    fetchUserDetails();
+  }, [user]);
 
   return (
     <>
@@ -296,8 +332,42 @@ export default function HeroSectionComp() {
                 </button>
               </div>
 
-              <Link href={"/post-your-requirement"}>
+              {/* <Link href={"/post-your-requirement"}>
                 <button className="bg-white text-gray-800 px-8 py-4 rounded-full font-semibold border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-300 shadow-md hover:shadow-lg inline-flex items-center gap-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                  </svg>
+                  Post Your Requirement
+                </button>
+              </Link>
+             */}
+
+              <Link
+                href={
+                  userDetails?.accountType === "employer"
+                    ? "/post-your-requirement"
+                    : "#"
+                }
+              >
+                <button
+                  onClick={(e) => {
+                    if (userDetails?.accountType !== "employer") {
+                      e.preventDefault();
+                      toast.error("Only employers can post job requirements");
+                    }
+                  }}
+                  className="bg-white text-gray-800 px-8 py-4 rounded-full font-semibold border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-300 shadow-md hover:shadow-lg inline-flex items-center gap-3"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
