@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  Timestamp,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContexts";
 import { useRouter } from "next/navigation";
@@ -18,10 +24,27 @@ interface JobRequirement {
   id: string;
   jobTitle: string;
   companyName: string;
+  agree: boolean;
   createdAt: string;
 }
 
-type ActiveTab = "resumes" | "jobs" | "users" | "settings";
+interface AppliedJob {
+  appliedAt: string;
+  coverLetter: string;
+  fullName: string;
+  jobId: string;
+  jobTitle: string;
+  phone: string;
+  resumeFileName: string;
+  resumeFileSize: string;
+  resumeFileType: string;
+  resumeUrl: string;
+  status: string;
+  userEmail: string;
+  userId: string;
+}
+
+type ActiveTab = "resumes" | "jobs" | "applied" | "settings";
 
 export default function AdminDashboard() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -29,6 +52,8 @@ export default function AdminDashboard() {
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [jobs, setJobs] = useState<JobRequirement[]>([]);
   const [activeTab, setActiveTab] = useState<ActiveTab>("resumes");
+
+  const [appliedJobs, setAppliedJobs] = useState<AppliedJob[]>([]);
 
   const { user } = useAuth() || { user: null };
   const router = useRouter();
@@ -126,6 +151,7 @@ export default function AdminDashboard() {
             id: doc.id,
             jobTitle: data.jobTitle || "Untitled Position",
             companyName: data.companyName || "Unknown Company",
+            agree: data.agree || false,
             createdAt,
           };
         });
@@ -137,12 +163,60 @@ export default function AdminDashboard() {
       }
     };
 
+    const fetchAppliedJobs = async () => {
+      try {
+        console.log("Fetching applied jobs...");
+        const appliedJobsSnapshot = await getDocs(
+          collection(db, "AppliedJobs")
+        );
+        const appliedJobsData = appliedJobsSnapshot.docs.map((doc) => {
+          const data = doc.data();
+          let appliedAt = "Unknown Date";
+
+          if (data.appliedAt) {
+            if (typeof data.appliedAt.toDate === "function") {
+              appliedAt = data.appliedAt.toDate().toLocaleString();
+            } else if (data.appliedAt.seconds) {
+              appliedAt = new Date(
+                data.appliedAt.seconds * 1000
+              ).toLocaleString();
+            } else if (typeof data.appliedAt === "string") {
+              appliedAt = new Date(data.appliedAt).toLocaleString();
+            }
+          }
+
+          return {
+            id: doc.id,
+            appliedAt,
+            coverLetter: data.coverLetter || "",
+            fullName: data.fullName || "Unknown",
+            jobId: data.jobId || "",
+            jobTitle: data.jobTitle || "Unknown Position",
+            phone: data.phone || "",
+            resumeFileName: data.resumeFileName || "",
+            resumeFileSize: data.resumeFileSize || "",
+            resumeFileType: data.resumeFileType || "",
+            resumeUrl: data.resumeUrl || "",
+            status: data.status || "pending",
+            userEmail: data.userEmail || "",
+            userId: data.userId || "",
+          };
+        });
+
+        console.log("Fetched applied jobs count:", appliedJobsData.length);
+        setAppliedJobs(appliedJobsData);
+      } catch (error) {
+        console.error("Error fetching applied jobs:", error);
+      }
+    };
+
     const initializeDashboard = async () => {
       await checkAdminStatus();
 
       if (isAdmin) {
         await fetchResumes();
         await fetchJobs();
+        await fetchAppliedJobs();
       }
       setLoading(false);
     };
@@ -291,12 +365,50 @@ export default function AdminDashboard() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <button className="text-indigo-600 hover:text-indigo-900 hover:underline mr-4">
+                        <button
+                          onClick={() =>
+                            router.push(`/admin/job-requirements/${job.id}`)
+                          }
+                          className="text-indigo-600 hover:text-indigo-900 hover:underline mr-4"
+                        >
                           View
                         </button>
-                        <button className="text-red-600 hover:text-red-900 hover:underline">
-                          Delete
-                        </button>
+
+                        {/* Toggle Switch */}
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={job.agree}
+                            onChange={async () => {
+                              try {
+                                await updateDoc(
+                                  doc(db, "JobRequirements", job.id),
+                                  {
+                                    agree: !job.agree,
+                                  }
+                                );
+                                // Update local state for immediate UI feedback
+                                setJobs(
+                                  jobs.map((j) =>
+                                    j.id === job.id
+                                      ? { ...j, agree: !j.agree }
+                                      : j
+                                  )
+                                );
+                              } catch (error) {
+                                console.error(
+                                  "Error toggling job status:",
+                                  error
+                                );
+                              }
+                            }}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                          <span className="ml-3 text-sm font-medium text-gray-700">
+                            {job.agree ? "Active" : "Inactive"}
+                          </span>
+                        </label>
                       </td>
                     </tr>
                   ))}
@@ -307,6 +419,108 @@ export default function AdminDashboard() {
                         className="px-6 py-4 text-center text-gray-500"
                       >
                         No job requirements found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      case "applied":
+        return (
+          <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-800">
+                Applied Jobs
+              </h2>
+              <p className="text-sm text-gray-600">
+                {appliedJobs.length} applications found
+              </p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Applicant
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Job Title
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Applied At
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {appliedJobs.map((job) => (
+                    <tr key={job.jobId}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {job.fullName}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {job.userEmail}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {job.jobTitle}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">
+                          {job.appliedAt}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                    ${
+                      job.status === "approved"
+                        ? "bg-green-100 text-green-800"
+                        : job.status === "rejected"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                        >
+                          {job.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap space-x-2">
+                        <a
+                          href={job.resumeUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-indigo-600 hover:text-indigo-900 hover:underline"
+                        >
+                          Resume
+                        </a>
+                        {/* <button
+                          onClick={() =>
+                            router.push(`/admin/job-requirements/${job.jobId}`)
+                          }
+                          className="text-blue-600 hover:text-blue-900 hover:underline"
+                        >
+                          View Job
+                        </button> */}
+                      </td>
+                    </tr>
+                  ))}
+                  {appliedJobs.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="px-6 py-4 text-center text-gray-500"
+                      >
+                        No applied jobs found
                       </td>
                     </tr>
                   )}
@@ -387,6 +601,35 @@ export default function AdminDashboard() {
                 </div>
               </button>
             </li>
+
+            <li>
+              <button
+                onClick={() => setActiveTab("applied")}
+                className={`w-full text-left px-4 py-2 rounded-md transition ${
+                  activeTab === "applied"
+                    ? "bg-indigo-900 text-white"
+                    : "text-indigo-200 hover:bg-indigo-800"
+                }`}
+              >
+                <div className="flex items-center">
+                  <svg
+                    className="w-5 h-5 mr-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                  Applied Jobs
+                </div>
+              </button>
+            </li>
           </ul>
         </nav>
       </div>
@@ -397,14 +640,12 @@ export default function AdminDashboard() {
           <h1 className="text-3xl font-bold text-gray-800">
             {activeTab === "resumes" && "Resume Management"}
             {activeTab === "jobs" && "Job Requirements"}
-            {activeTab === "users" && "User Management"}
-            {activeTab === "settings" && "Admin Settings"}
+            {activeTab === "applied" && "Applied Jobs Management"}
           </h1>
           <p className="text-gray-600 mt-2">
             {activeTab === "resumes" && "View and manage all submitted resumes"}
             {activeTab === "jobs" && "Manage job postings and requirements"}
-            {activeTab === "users" && "View and manage all registered users"}
-            {activeTab === "settings" && "Configure admin dashboard settings"}
+            {activeTab === "applied" && "View and manage all job applications"}
           </p>
         </div>
 
@@ -413,192 +654,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
-// "use client";
-
-// import React, { useEffect, useState } from "react";
-// import { collection, getDocs } from "firebase/firestore";
-// import { db } from "@/lib/firebase";
-// import { useAuth } from "@/contexts/AuthContexts";
-// import { useRouter } from "next/navigation";
-
-// interface Resume {
-//   id: string;
-//   userName: string;
-//   pdfUrl: string;
-//   createdAt: string;
-// }
-
-// export default function AdminDashboard() {
-//   const [isAdmin, setIsAdmin] = useState(false);
-//   const [loading, setLoading] = useState(true);
-//   const [resumes, setResumes] = useState<Resume[]>([]);
-
-//   const { user } = useAuth() || { user: null };
-//   const router = useRouter();
-
-//   useEffect(() => {
-//     console.log("Initializing Admin Dashboard check...");
-
-//     const checkAdminStatus = async () => {
-//       if (!user) {
-//         console.log("No user found, redirecting...");
-//         setIsAdmin(false);
-//         setLoading(false);
-//         return;
-//       }
-
-//       try {
-//         console.log("Checking admin status for user:", user.uid);
-//         const userDoc = await getDocs(collection(db, "Users"));
-//         const adminUser = userDoc.docs.find(
-//           (doc) => doc.id === user.uid && doc.data().isAdmin === true
-//         );
-
-//         if (!adminUser) {
-//           console.log("User is not an admin:", user.uid);
-//           setIsAdmin(false);
-//           setLoading(false);
-//           return;
-//         }
-
-//         console.log("User is admin:", user.uid);
-//         setIsAdmin(true);
-//       } catch (error) {
-//         console.error("Error checking admin status:", error);
-//         setIsAdmin(false);
-//         setLoading(false);
-//       }
-//     };
-
-//     const fetchResumes = async () => {
-//       try {
-//         console.log("Fetching resumes...");
-//         const resumesSnapshot = await getDocs(collection(db, "resumes"));
-//         const resumesData = resumesSnapshot.docs.map((doc) => {
-//           const data = doc.data();
-//           let createdAt = "Unknown Date";
-
-//           // Handle different possible date formats
-//           if (data.createdAt) {
-//             if (typeof data.createdAt.toDate === "function") {
-//               // It's a Firestore Timestamp
-//               createdAt = data.createdAt.toDate().toLocaleDateString();
-//             } else if (data.createdAt.seconds) {
-//               // It might be a timestamp in seconds
-//               createdAt = new Date(
-//                 data.createdAt.seconds * 1000
-//               ).toLocaleDateString();
-//             } else if (typeof data.createdAt === "string") {
-//               // It might be an ISO string
-//               createdAt = new Date(data.createdAt).toLocaleDateString();
-//             }
-//           }
-
-//           return {
-//             id: doc.id,
-//             userName: data.userName || "Unknown",
-//             pdfUrl: data.pdfUrl || "",
-//             createdAt,
-//           };
-//         });
-
-//         console.log("Fetched resumes count:", resumesData.length);
-//         setResumes(resumesData);
-//       } catch (error) {
-//         console.error("Error fetching resumes:", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     const initializeDashboard = async () => {
-//       await checkAdminStatus();
-
-//       if (isAdmin) {
-//         await fetchResumes();
-//       } else {
-//         setLoading(false);
-//       }
-//     };
-
-//     initializeDashboard();
-//   }, [user, isAdmin]);
-
-//   if (loading) {
-//     return (
-//       <div className="min-h-screen flex items-center justify-center">
-//         <div className="text-xl">Loading...</div>
-//       </div>
-//     );
-//   }
-
-//   if (!isAdmin) {
-//     return (
-//       <div className="min-h-screen flex items-center justify-center">
-//         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-//           You don't have permission to access this page
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="p-6 max-w-7xl mx-auto">
-//       <h1 className="text-3xl font-bold mb-8 text-black">
-//         Resume Management Dashboard
-//       </h1>
-
-//       <div className="bg-white shadow-md rounded-lg overflow-hidden">
-//         <table className="min-w-full divide-y divide-gray-200">
-//           <thead className="bg-gray-50">
-//             <tr>
-//               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-//                 User Name
-//               </th>
-//               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-//                 Date Created
-//               </th>
-//               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-//                 Actions
-//               </th>
-//             </tr>
-//           </thead>
-//           <tbody className="bg-white divide-y divide-gray-200">
-//             {resumes.map((resume) => (
-//               <tr key={resume.id}>
-//                 <td className="px-6 py-4 whitespace-nowrap">
-//                   <div className="text-sm font-medium text-gray-900">
-//                     {resume.userName}
-//                   </div>
-//                 </td>
-//                 <td className="px-6 py-4 whitespace-nowrap">
-//                   <div className="text-sm text-gray-500">
-//                     {resume.createdAt}
-//                   </div>
-//                 </td>
-//                 <td className="px-6 py-4 whitespace-nowrap">
-//                   <a
-//                     href={resume.pdfUrl}
-//                     target="_blank"
-//                     rel="noopener noreferrer"
-//                     className="text-indigo-600 hover:text-indigo-900"
-//                   >
-//                     Download PDF
-//                   </a>
-//                 </td>
-//               </tr>
-//             ))}
-//             {resumes.length === 0 && (
-//               <tr>
-//                 <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
-//                   No resumes found
-//                 </td>
-//               </tr>
-//             )}
-//           </tbody>
-//         </table>
-//       </div>
-//     </div>
-//   );
-// }
