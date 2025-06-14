@@ -5,12 +5,14 @@ import { db } from "@/lib/firebase";
 import { UserDetails } from "@/types/userDetails";
 import { doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function JobPortalMsgComponent() {
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const { user } = useAuth() || { user: null };
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -73,7 +75,11 @@ export default function JobPortalMsgComponent() {
 
         <div className="flex flex-col sm:flex-row justify-center gap-6">
           <Link
-            href={userDetails?.accountType === "jobSeeker" ? "/jobs" : "#"}
+            href={
+              user != null && userDetails?.accountType === "jobSeeker"
+                ? "/jobs"
+                : "/login"
+            }
             className="relative overflow-hidden group bg-white text-blue-600 px-10 py-5 rounded-full font-bold hover:bg-gray-100 transition-all duration-300 shadow-xl hover:shadow-2xl"
           >
             <span className="relative z-10 flex items-center gap-3">
@@ -98,17 +104,24 @@ export default function JobPortalMsgComponent() {
 
           <Link
             href={
-              userDetails?.accountType === "employer"
+              user != null && userDetails?.accountType === "employer"
                 ? "/post-your-requirement"
-                : "#"
+                : "/login"
             }
             className="relative overflow-hidden group bg-indigo-600 text-white px-10 py-5 rounded-full font-bold hover:bg-indigo-700 transition-all duration-300 shadow-xl hover:shadow-2xl"
           >
             <button
               onClick={(e) => {
-                if (userDetails?.accountType !== "employer") {
+                if (user == null) {
+                  router.push("/login");
+                } else if (
+                  user != null &&
+                  userDetails?.accountType !== "employer"
+                ) {
                   e.preventDefault();
-                  toast.error("Only employers can post job requirements");
+                  toast.error(
+                    "Only employers can post job requirements. Please use a job seeker account"
+                  );
                 }
               }}
             >

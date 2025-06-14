@@ -5,7 +5,7 @@ export default function CategorySectionComponent() {
   const categories = [
     {
       id: 1,
-      title: "Engineers",
+      title: "Education",
       description: "Teaching and administrative roles in schools and colleges",
       icon: (
         <svg

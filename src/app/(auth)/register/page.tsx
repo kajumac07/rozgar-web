@@ -6,6 +6,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -175,6 +176,15 @@ export default function RegisterPage() {
           >
             {loading ? "Creating Account..." : "Sign up"}
           </button>
+
+          <div className="flex justify-center">
+            <h4>
+              Already have an account ?{" "}
+              <Link href={"/login"}>
+                <span className="text-indigo-700 cursor-pointer">Login</span>
+              </Link>
+            </h4>
+          </div>
         </form>
       </div>
     </div>

@@ -58,7 +58,7 @@ export default function HeroSectionComp() {
 
   const handleUploadClick = () => {
     if (!user) {
-      router.push("/register");
+      router.push("/login");
       return;
     }
 
@@ -334,16 +334,23 @@ export default function HeroSectionComp() {
 
               <Link
                 href={
-                  userDetails?.accountType === "employer"
+                  user != null && userDetails?.accountType === "employer"
                     ? "/post-your-requirement"
-                    : "#"
+                    : "/login"
                 }
               >
                 <button
                   onClick={(e) => {
-                    if (userDetails?.accountType !== "employer") {
+                    if (user == null) {
+                      router.push("/login");
+                    } else if (
+                      user != null &&
+                      userDetails?.accountType !== "employer"
+                    ) {
                       e.preventDefault();
-                      toast.error("Only employers can post job requirements");
+                      toast.error(
+                        "Only employers can post job requirements. Please use a job seeker account"
+                      );
                     }
                   }}
                   className="bg-white text-gray-800 px-8 py-4 rounded-full font-semibold border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-300 shadow-md hover:shadow-lg inline-flex items-center gap-3"

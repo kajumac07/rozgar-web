@@ -6,6 +6,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -91,6 +92,15 @@ export default function LoginPage() {
             >
               {loading ? "Logging in..." : "Sign in"}
             </button>
+          </div>
+
+          <div className="flex justify-center">
+            <h4>
+              Don't have an account ?{" "}
+              <Link href={"/register"}>
+                <span className="text-indigo-700 cursor-pointer">Register</span>
+              </Link>
+            </h4>
           </div>
         </form>
       </div>
