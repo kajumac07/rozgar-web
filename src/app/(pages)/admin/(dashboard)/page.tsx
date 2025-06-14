@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   Timestamp,
   updateDoc,
@@ -11,7 +12,7 @@ import {
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContexts";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { UserDetails } from "@/types/userDetails";
 
 interface Resume {
   id: string;
@@ -29,6 +30,7 @@ interface JobRequirement {
 }
 
 interface AppliedJob {
+  id: string;
   appliedAt: string;
   coverLetter: string;
   fullName: string;
@@ -44,7 +46,16 @@ interface AppliedJob {
   userId: string;
 }
 
-type ActiveTab = "resumes" | "jobs" | "applied" | "settings";
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  isAdmin: boolean;
+  createdAt: string;
+  accountType: string;
+}
+
+type ActiveTab = "resumes" | "jobs" | "applied" | "users";
 
 export default function AdminDashboard() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -52,8 +63,8 @@ export default function AdminDashboard() {
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [jobs, setJobs] = useState<JobRequirement[]>([]);
   const [activeTab, setActiveTab] = useState<ActiveTab>("resumes");
-
   const [appliedJobs, setAppliedJobs] = useState<AppliedJob[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   const { user } = useAuth() || { user: null };
   const router = useRouter();
@@ -71,12 +82,9 @@ export default function AdminDashboard() {
 
       try {
         console.log("Checking admin status for user:", user.uid);
-        const userDoc = await getDocs(collection(db, "Users"));
-        const adminUser = userDoc.docs.find(
-          (doc) => doc.id === user.uid && doc.data().isAdmin === true
-        );
+        const userDoc = await getDoc(doc(db, "Users", user.uid));
 
-        if (!adminUser) {
+        if (!userDoc.exists() || !userDoc.data().isAdmin) {
           console.log("User is not an admin:", user.uid);
           setIsAdmin(false);
           setLoading(false);
@@ -210,13 +218,53 @@ export default function AdminDashboard() {
       }
     };
 
+    const fetchAllUsers = async () => {
+      try {
+        console.log("Fetching all users...");
+        const usersSnapshot = await getDocs(collection(db, "Users"));
+        const usersData = usersSnapshot.docs.map((doc) => {
+          const data = doc.data();
+          let createdAt = "Unknown Date";
+
+          if (data.createdAt) {
+            if (typeof data.createdAt.toDate === "function") {
+              createdAt = data.createdAt.toDate().toLocaleDateString();
+            } else if (data.createdAt.seconds) {
+              createdAt = new Date(
+                data.createdAt.seconds * 1000
+              ).toLocaleDateString();
+            } else if (typeof data.createdAt === "string") {
+              createdAt = new Date(data.createdAt).toLocaleDateString();
+            }
+          }
+
+          return {
+            id: doc.id,
+            email: data.email || "No email",
+            name: data.name || "Unknown",
+            isAdmin: data.isAdmin || false,
+            accountType: data.accountType,
+            createdAt,
+          };
+        });
+
+        console.log("Fetched users count:", usersData.length);
+        setUsers(usersData);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
     const initializeDashboard = async () => {
       await checkAdminStatus();
 
       if (isAdmin) {
-        await fetchResumes();
-        await fetchJobs();
-        await fetchAppliedJobs();
+        await Promise.all([
+          fetchResumes(),
+          fetchJobs(),
+          fetchAppliedJobs(),
+          fetchAllUsers(),
+        ]);
       }
       setLoading(false);
     };
@@ -461,7 +509,7 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {appliedJobs.map((job) => (
-                    <tr key={job.jobId}>
+                    <tr key={job.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
                           {job.fullName}
@@ -503,14 +551,6 @@ export default function AdminDashboard() {
                         >
                           Resume
                         </a>
-                        {/* <button
-                          onClick={() =>
-                            router.push(`/admin/job-requirements/${job.jobId}`)
-                          }
-                          className="text-blue-600 hover:text-blue-900 hover:underline"
-                        >
-                          View Job
-                        </button> */}
                       </td>
                     </tr>
                   ))}
@@ -529,7 +569,91 @@ export default function AdminDashboard() {
             </div>
           </div>
         );
-
+      case "users":
+        return (
+          <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-800">
+                User Management
+              </h2>
+              <p className="text-sm text-gray-600">
+                {users.length} users registered
+              </p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Role
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Account Type
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Joined Date
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {users.map((user) => (
+                    <tr key={user.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {user.name}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {user.email}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            user.isAdmin
+                              ? "bg-purple-100 text-purple-800"
+                              : "bg-blue-100 text-blue-800"
+                          }`}
+                        >
+                          {user.isAdmin ? "Admin" : "User"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-blue-800 uppercase">
+                            {user.accountType}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">
+                          {user.createdAt}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {users.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="px-6 py-4 text-center text-gray-500"
+                      >
+                        No users found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
       default:
         return null;
     }
@@ -538,96 +662,117 @@ export default function AdminDashboard() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar Navigation */}
-      <div className="w-64 bg-indigo-700 text-white">
+      <div className="w-64 bg-gradient-to-b from-indigo-700 to-indigo-800 text-white shadow-xl">
         <div className="p-4 border-b border-indigo-600">
           <h1 className="text-xl font-bold">Admin Dashboard</h1>
-          <p className="text-sm text-indigo-200">Welcome, {user?.email}</p>
+          <p className="text-sm text-indigo-200 truncate">
+            Welcome, {user?.email}
+          </p>
         </div>
         <nav className="p-4">
           <ul className="space-y-2">
             <li>
               <button
                 onClick={() => setActiveTab("resumes")}
-                className={`w-full text-left px-4 py-2 rounded-md transition ${
+                className={`w-full text-left px-4 py-3 rounded-md transition flex items-center ${
                   activeTab === "resumes"
-                    ? "bg-indigo-900 text-white"
-                    : "text-indigo-200 hover:bg-indigo-800"
+                    ? "bg-white text-indigo-700 shadow-md"
+                    : "text-indigo-200 hover:bg-indigo-600 hover:text-white"
                 }`}
               >
-                <div className="flex items-center">
-                  <svg
-                    className="w-5 h-5 mr-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                  Resume Dashboard
-                </div>
+                <svg
+                  className="w-5 h-5 mr-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                Resume Dashboard
               </button>
             </li>
             <li>
               <button
                 onClick={() => setActiveTab("jobs")}
-                className={`w-full text-left px-4 py-2 rounded-md transition ${
+                className={`w-full text-left px-4 py-3 rounded-md transition flex items-center ${
                   activeTab === "jobs"
-                    ? "bg-indigo-900 text-white"
-                    : "text-indigo-200 hover:bg-indigo-800"
+                    ? "bg-white text-indigo-700 shadow-md"
+                    : "text-indigo-200 hover:bg-indigo-600 hover:text-white"
                 }`}
               >
-                <div className="flex items-center">
-                  <svg
-                    className="w-5 h-5 mr-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
-                  Job Requirements
-                </div>
+                <svg
+                  className="w-5 h-5 mr-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+                Job Requirements
               </button>
             </li>
-
             <li>
               <button
                 onClick={() => setActiveTab("applied")}
-                className={`w-full text-left px-4 py-2 rounded-md transition ${
+                className={`w-full text-left px-4 py-3 rounded-md transition flex items-center ${
                   activeTab === "applied"
-                    ? "bg-indigo-900 text-white"
-                    : "text-indigo-200 hover:bg-indigo-800"
+                    ? "bg-white text-indigo-700 shadow-md"
+                    : "text-indigo-200 hover:bg-indigo-600 hover:text-white"
                 }`}
               >
-                <div className="flex items-center">
-                  <svg
-                    className="w-5 h-5 mr-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                    />
-                  </svg>
-                  Applied Jobs
-                </div>
+                <svg
+                  className="w-5 h-5 mr-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  />
+                </svg>
+                Applied Jobs
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveTab("users")}
+                className={`w-full text-left px-4 py-3 rounded-md transition flex items-center ${
+                  activeTab === "users"
+                    ? "bg-white text-indigo-700 shadow-md"
+                    : "text-indigo-200 hover:bg-indigo-600 hover:text-white"
+                }`}
+              >
+                <svg
+                  className="w-5 h-5 mr-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                  />
+                </svg>
+                User Management
               </button>
             </li>
           </ul>
@@ -636,16 +781,18 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <div className="flex-1 p-8">
-        <div className="mb-6">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800">
             {activeTab === "resumes" && "Resume Management"}
             {activeTab === "jobs" && "Job Requirements"}
             {activeTab === "applied" && "Applied Jobs Management"}
+            {activeTab === "users" && "User Management"}
           </h1>
           <p className="text-gray-600 mt-2">
             {activeTab === "resumes" && "View and manage all submitted resumes"}
             {activeTab === "jobs" && "Manage job postings and requirements"}
             {activeTab === "applied" && "View and manage all job applications"}
+            {activeTab === "users" && "Manage all registered users"}
           </p>
         </div>
 
