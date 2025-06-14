@@ -21,7 +21,7 @@ export default function InfoSectionComponent() {
 
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-10">
-            <div className="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-blue-100 transform hover:-translate-y-1">
+            {/* <div className="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-blue-100 transform hover:-translate-y-1">
               <div className="flex items-center gap-5 mb-6">
                 <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center shadow-inner">
                   <svg
@@ -53,7 +53,7 @@ export default function InfoSectionComponent() {
                   Find Jobs
                 </button>
               </div>
-            </div>
+            </div> */}
 
             <div className="grid grid-cols-2 gap-6">
               <div className="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-blue-500 hover:shadow-xl transition-shadow">

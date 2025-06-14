@@ -1,9 +1,34 @@
 "use client";
 
+import { useAuth } from "@/contexts/AuthContexts";
+import { db } from "@/lib/firebase";
+import { UserDetails } from "@/types/userDetails";
+import { doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function JobPortalMsgComponent() {
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+  const { user } = useAuth() || { user: null };
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, "Users", user.uid));
+          if (userDoc.exists()) {
+            setUserDetails(userDoc.data() as UserDetails);
+          }
+        } catch (error) {
+          console.error("Error fetching user details:", error);
+        }
+      }
+    };
+
+    fetchUserDetails();
+  }, [user]);
+
   return (
     <section className="relative py-20 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 text-white overflow-hidden">
       {/* Decorative elements */}
@@ -48,7 +73,7 @@ export default function JobPortalMsgComponent() {
 
         <div className="flex flex-col sm:flex-row justify-center gap-6">
           <Link
-            href="/signup?type=jobseeker"
+            href={userDetails?.accountType === "jobSeeker" ? "/jobs" : "#"}
             className="relative overflow-hidden group bg-white text-blue-600 px-10 py-5 rounded-full font-bold hover:bg-gray-100 transition-all duration-300 shadow-xl hover:shadow-2xl"
           >
             <span className="relative z-10 flex items-center gap-3">
@@ -72,27 +97,40 @@ export default function JobPortalMsgComponent() {
           </Link>
 
           <Link
-            href="/signup?type=employer"
+            href={
+              userDetails?.accountType === "employer"
+                ? "/post-your-requirement"
+                : "#"
+            }
             className="relative overflow-hidden group bg-indigo-600 text-white px-10 py-5 rounded-full font-bold hover:bg-indigo-700 transition-all duration-300 shadow-xl hover:shadow-2xl"
           >
-            <span className="relative z-10 flex items-center gap-3">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                />
-              </svg>
-              Post a Job Opening
-            </span>
-            <span className="absolute inset-0 bg-gradient-to-r from-white to-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></span>
+            <button
+              onClick={(e) => {
+                if (userDetails?.accountType !== "employer") {
+                  e.preventDefault();
+                  toast.error("Only employers can post job requirements");
+                }
+              }}
+            >
+              <span className="relative z-10 flex items-center gap-3">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+                Post a Job Opening
+              </span>
+              <span className="absolute inset-0 bg-gradient-to-r from-white to-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></span>
+            </button>
           </Link>
         </div>
 

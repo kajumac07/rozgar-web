@@ -204,7 +204,7 @@ export default function HeroSectionComp() {
             </div>
 
             {/* Search box */}
-            <div className="bg-white p-6 rounded-2xl shadow-xl max-w-5xl mx-auto border border-gray-100 transform transition-all hover:shadow-2xl">
+            {/* <div className="bg-white p-6 rounded-2xl shadow-xl max-w-5xl mx-auto border border-gray-100 transform transition-all hover:shadow-2xl">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -295,7 +295,7 @@ export default function HeroSectionComp() {
                   Search Jobs
                 </button>
               </div>
-            </div>
+            </div> */}
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row justify-center gap-4 mt-12">
@@ -331,26 +331,6 @@ export default function HeroSectionComp() {
                   {selectedFile ? "Change Resume" : "Upload Your Resume"}
                 </button>
               </div>
-
-              {/* <Link href={"/post-your-requirement"}>
-                <button className="bg-white text-gray-800 px-8 py-4 rounded-full font-semibold border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-300 shadow-md hover:shadow-lg inline-flex items-center gap-3">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                  </svg>
-                  Post Your Requirement
-                </button>
-              </Link>
-             */}
 
               <Link
                 href={
