@@ -127,7 +127,7 @@ export default function Footer() {
               Support & Legal
             </h3>
             <ul className="space-y-3">
-              <li>
+              {/* <li>
                 <a
                   href="/terms"
                   className="text-gray-400 hover:text-blue-400 transition-colors"
@@ -135,6 +135,7 @@ export default function Footer() {
                   Terms of Use
                 </a>
               </li>
+              */}
               <li>
                 <a
                   href="/terms-conditions"
@@ -151,7 +152,7 @@ export default function Footer() {
                   Privacy Policy
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a
                   href="/cookie"
                   className="text-gray-400 hover:text-blue-400 transition-colors"
@@ -159,6 +160,7 @@ export default function Footer() {
                   Cookie Policy
                 </a>
               </li>
+            */}
             </ul>
           </div>
         </div>
