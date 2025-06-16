@@ -53,7 +53,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="/companies"
+                  href="#"
                   className="text-gray-400 hover:text-blue-400 transition-colors"
                 >
                   Companies
@@ -61,7 +61,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="/candidates"
+                  href="#"
                   className="text-gray-400 hover:text-blue-400 transition-colors"
                 >
                   Candidates
@@ -69,7 +69,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="/pricing"
+                  href="#"
                   className="text-gray-400 hover:text-blue-400 transition-colors"
                 >
                   Pricing
@@ -87,7 +87,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="/about"
+                  href="#"
                   className="text-gray-400 hover:text-blue-400 transition-colors"
                 >
                   About Us
@@ -95,7 +95,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="/blog"
+                  href="#"
                   className="text-gray-400 hover:text-blue-400 transition-colors"
                 >
                   Blogs
@@ -103,7 +103,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="/faqs"
+                  href="#"
                   className="text-gray-400 hover:text-blue-400 transition-colors"
                 >
                   FAQs
@@ -111,7 +111,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="/contact"
+                  href="#"
                   className="text-gray-400 hover:text-blue-400 transition-colors"
                 >
                   Contact

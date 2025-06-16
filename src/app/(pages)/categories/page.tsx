@@ -148,42 +148,42 @@ const CategoriesPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {categories.map((category) => (
-              <Link
-                key={category.id}
-                href={`/categories/${category.id}`}
-                className="group block"
-              >
-                <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
-                  <div className="p-6 flex-grow">
-                    <div className="flex items-center mb-4">
-                      <span className="text-4xl mr-4">{category.icon}</span>
-                      <h2 className="text-xl font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
-                        {category.title}
-                      </h2>
-                    </div>
-                    <p className="text-gray-600">
-                      {category.count.toLocaleString()} jobs available
-                    </p>
+              // <Link
+              //   key={category.id}
+              //   href={`/categories/${category.id}`}
+              //   className="group block"
+              // >
+              <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
+                <div className="p-6 flex-grow">
+                  <div className="flex items-center mb-4">
+                    <span className="text-4xl mr-4">{category.icon}</span>
+                    <h2 className="text-xl font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
+                      {category.title}
+                    </h2>
                   </div>
-                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                    <div className="flex items-center text-blue-600 font-medium group-hover:underline">
-                      View jobs
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="ml-2 h-4 w-4"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </div>
+                  <p className="text-gray-600">
+                    {category.count.toLocaleString()} jobs available
+                  </p>
+                </div>
+                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                  <div className="flex items-center text-blue-600 font-medium group-hover:underline">
+                    View jobs
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="ml-2 h-4 w-4"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
                   </div>
                 </div>
-              </Link>
+              </div>
+              // </Link>
             ))}
           </div>
         </div>
