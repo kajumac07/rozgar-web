@@ -338,7 +338,7 @@ export default function AdminDashboard() {
                           {resume.createdAt}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      {/* <td className="px-6 py-4 whitespace-nowrap">
                         <a
                           href={resume.pdfUrl}
                           target="_blank"
@@ -347,6 +347,27 @@ export default function AdminDashboard() {
                         >
                           Download PDF
                         </a>
+                      </td>
+                    */}
+
+                      <td className="px-6 py-4 whitespace-nowrap space-x-2">
+                        <button
+                          onClick={() =>
+                            router.push(`/admin/resumes/${resume.id}`)
+                          }
+                          className="text-indigo-600 hover:text-indigo-900 hover:underline"
+                        >
+                          View
+                        </button>
+                        {/* <a
+                          href={resume.pdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-indigo-600 hover:text-indigo-900 hover:underline"
+                        >
+                          Download
+                        </a>
+                      */}
                       </td>
                     </tr>
                   ))}

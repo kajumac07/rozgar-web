@@ -70,73 +70,76 @@ export default function HeroSectionComp() {
       return;
     }
 
-    fileInputRef.current?.click();
+    // Redirect to the resume upload form page
+    router.push("/upload-resume");
+
+    // fileInputRef.current?.click();
   };
 
-  const handleSubmit = async () => {
-    if (!selectedFile || !user) {
-      toast.error("Please select a file first");
-      return;
-    }
+  // const handleSubmit = async () => {
+  //   if (!selectedFile || !user) {
+  //     toast.error("Please select a file first");
+  //     return;
+  //   }
 
-    // Additional check for employer trying to upload resume
-    if (userDetails?.accountType === "employer") {
-      toast.error(
-        "Employer accounts cannot upload resumes. Please use a job seeker account."
-      );
-      return;
-    }
+  //   // Additional check for employer trying to upload resume
+  //   if (userDetails?.accountType === "employer") {
+  //     toast.error(
+  //       "Employer accounts cannot upload resumes. Please use a job seeker account."
+  //     );
+  //     return;
+  //   }
 
-    setIsUploading(true);
-    toast.loading("Uploading your resume...");
+  //   setIsUploading(true);
+  //   toast.loading("Uploading your resume...");
 
-    try {
-      // Get the actual file from input
-      const file = fileInputRef.current?.files?.[0];
-      if (!file) throw new Error("No file selected");
+  //   try {
+  //     // Get the actual file from input
+  //     const file = fileInputRef.current?.files?.[0];
+  //     if (!file) throw new Error("No file selected");
 
-      // Upload file to Firebase Storage
-      const storageRef = ref(storage, `resumes/${user.uid}/${file.name}`);
-      const snapshot = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(snapshot.ref);
+  //     // Upload file to Firebase Storage
+  //     const storageRef = ref(storage, `resumes/${user.uid}/${file.name}`);
+  //     const snapshot = await uploadBytes(storageRef, file);
+  //     const downloadURL = await getDownloadURL(snapshot.ref);
 
-      // Get user's name from Users collection - with better error handling
-      let userName = "Unknown";
-      try {
-        const userDoc = await getDoc(doc(db, "Users", user.uid));
-        if (userDoc.exists()) {
-          userName = userDoc.data()?.name || "Unknown";
-          console.log("User document data:", userDoc.data()); // Debugging
-        } else {
-          console.warn("User document doesn't exist"); // Debugging
-        }
-      } catch (userDocError) {
-        console.error("Error fetching user document:", userDocError);
-      }
+  //     // Get user's name from Users collection - with better error handling
+  //     let userName = "Unknown";
+  //     try {
+  //       const userDoc = await getDoc(doc(db, "Users", user.uid));
+  //       if (userDoc.exists()) {
+  //         userName = userDoc.data()?.name || "Unknown";
+  //         console.log("User document data:", userDoc.data()); // Debugging
+  //       } else {
+  //         console.warn("User document doesn't exist"); // Debugging
+  //       }
+  //     } catch (userDocError) {
+  //       console.error("Error fetching user document:", userDocError);
+  //     }
 
-      console.log("Pdf uploaded by UserName is ", userName);
+  //     console.log("Pdf uploaded by UserName is ", userName);
 
-      // Save resume details to Resumes collection
-      await addDoc(collection(db, "resumes"), {
-        id: user.uid,
-        userName: userName,
-        pdfUrl: downloadURL,
-        createdAt: new Date().toISOString(),
-        userId: user.uid,
-        docId: file.name,
-      });
+  //     // Save resume details to Resumes collection
+  //     await addDoc(collection(db, "resumes"), {
+  //       id: user.uid,
+  //       userName: userName,
+  //       pdfUrl: downloadURL,
+  //       createdAt: new Date().toISOString(),
+  //       userId: user.uid,
+  //       docId: file.name,
+  //     });
 
-      toast.dismiss();
-      toast.success("Resume uploaded successfully!");
-      setSelectedFile(null);
-    } catch (error) {
-      console.error("Error uploading resume:", error);
-      toast.dismiss();
-      toast.error("Failed to upload resume");
-    } finally {
-      setIsUploading(false);
-    }
-  };
+  //     toast.dismiss();
+  //     toast.success("Resume uploaded successfully!");
+  //     setSelectedFile(null);
+  //   } catch (error) {
+  //     console.error("Error uploading resume:", error);
+  //     toast.dismiss();
+  //     toast.error("Failed to upload resume");
+  //   } finally {
+  //     setIsUploading(false);
+  //   }
+  // };
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -402,7 +405,7 @@ export default function HeroSectionComp() {
                     </div>
                   </div>
                   <button
-                    onClick={handleSubmit}
+                    // onClick={handleSubmit}
                     disabled={isUploading}
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-green-400 flex items-center gap-2"
                   >
