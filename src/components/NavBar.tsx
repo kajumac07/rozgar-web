@@ -74,42 +74,6 @@ export default function NavBar() {
                   </span>
                 </a>
               </div>
-              {/* <div className="relative">
-                <a
-                  href="/explore"
-                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 group flex items-center gap-1"
-                >
-                  <Compass size={16} />
-                  <span className="relative">
-                    Explore
-                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
-                  </span>
-                </a>
-              </div>
-              <div className="relative">
-                <a
-                  href="/blog"
-                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 group flex items-center gap-1"
-                >
-                  <FileText size={16} />
-                  <span className="relative">
-                    Blog
-                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
-                  </span>
-                </a>
-              </div>
-              <div className="relative">
-                <a
-                  href="/contact"
-                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 group flex items-center gap-1"
-                >
-                  <Mail size={16} />
-                  <span className="relative">
-                    Contact
-                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
-                  </span>
-                </a>
-              </div> */}
 
               <div className="relative">
                 <Link
@@ -174,73 +138,64 @@ export default function NavBar() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-200">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              <a
-                href="/"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50  items-center gap-2"
-              >
-                <Briefcase size={16} />
-                Home
-              </a>
-              <a
-                href="/jobs"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 items-center gap-2"
-              >
-                <Briefcase size={16} />
-                Jobs
-              </a>
-              <a
-                href="/explore"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 items-center gap-2"
-              >
-                <Compass size={16} />
-                Explore
-              </a>
-              <a
-                href="/blog"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50  items-center gap-2"
-              >
-                <FileText size={16} />
-                Blog
-              </a>
-              <a
-                href="/contact"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50  items-center gap-2"
-              >
-                <Mail size={16} />
-                Contact
-              </a>
-              <div className="pt-4 pb-2 border-t border-gray-200">
-                <div className="flex items-center gap-3">
-                  {user ? (
-                    <>
-                      <span className="text-gray-700">{user.email}</span>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-full hover:bg-blue-50"
-                      >
-                        <LogOut size={16} />
-                        Logout
+          <div className="md:hidden bg-white border-t border-gray-200 shadow-md rounded-b-xl">
+            <div className="px-4 pt-4 pb-6 space-y-4">
+              {/* Menu Items */}
+              <div className="space-y-2">
+                <Link
+                  href="/"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200"
+                >
+                  <Briefcase size={18} />
+                  Home
+                </Link>
+                <Link
+                  href="/jobs"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200"
+                >
+                  <Briefcase size={18} />
+                  Jobs
+                </Link>
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200"
+                >
+                  <PersonStanding size={18} />
+                  Admin
+                </Link>
+              </div>
+
+              <div className="border-t border-gray-200 pt-4">
+                {user ? (
+                  <div className="space-y-3">
+                    <p className="text-gray-600 text-sm">Logged in as:</p>
+                    <div className="text-gray-800 font-medium">
+                      {user.email}
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 text-blue-600 border border-blue-600 rounded-full hover:bg-blue-50 transition-all duration-200 shadow-sm"
+                    >
+                      <LogOut size={18} />
+                      Logout
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <Link href="/login">
+                      <button className="w-full flex items-center justify-center gap-2 px-4 py-3 text-blue-600 border border-blue-600 rounded-full hover:bg-blue-50 transition-all duration-200 shadow-sm">
+                        <LogIn size={18} />
+                        Login
                       </button>
-                    </>
-                  ) : (
-                    <>
-                      <Link href="/login">
-                        <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-full hover:bg-blue-50">
-                          <LogIn size={16} />
-                          Login
-                        </button>
-                      </Link>
-                      <Link href="/register">
-                        <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-700 hover:to-indigo-700">
-                          <UserPlus size={16} />
-                          Register
-                        </button>
-                      </Link>
-                    </>
-                  )}
-                </div>
+                    </Link>
+                    <Link href="/register">
+                      <button className="w-full flex items-center justify-center gap-2 px-4 py-3 text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md">
+                        <UserPlus size={18} />
+                        Register
+                      </button>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>
