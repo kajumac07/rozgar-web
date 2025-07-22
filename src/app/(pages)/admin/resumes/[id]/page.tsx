@@ -138,16 +138,15 @@ export default function ResumeDetailsPage() {
                 </p>
               </div>
               <div className="mt-4 sm:mt-0">
-                <button className="bg-white text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700">
-                  <a
-                    href={resume.pdfUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Download className="mr-2 h-4 w-4" />
-                    Download Resume
-                  </a>
-                </button>
+                <a
+                  href={resume.pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-blue-600 shadow-sm hover:bg-blue-50"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Resume
+                </a>
               </div>
             </div>
           </div>

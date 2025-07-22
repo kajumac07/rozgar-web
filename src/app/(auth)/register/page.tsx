@@ -132,6 +132,7 @@ export default function RegisterPage() {
                 />
                 <span className="text-sm text-gray-800">I want a job</span>
               </label>
+
               <label className="flex items-center gap-2">
                 <input
                   type="radio"
@@ -143,6 +144,17 @@ export default function RegisterPage() {
                 <span className="text-sm text-gray-800">
                   I want to hire people
                 </span>
+              </label>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="accountType"
+                  value="business"
+                  checked={accountType === "business"}
+                  onChange={() => setAccountType("business")}
+                />
+                <span className="text-sm text-gray-800">Start a Business</span>
               </label>
             </div>
           </div>

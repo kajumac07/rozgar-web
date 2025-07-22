@@ -63,7 +63,10 @@ export default function HeroSectionComp() {
     }
 
     // Check if user is an employer
-    if (userDetails?.accountType === "employer") {
+    if (
+      userDetails?.accountType === "employer" ||
+      userDetails?.accountType === "business"
+    ) {
       toast.error(
         "Employers cannot upload resumes. Please use a job seeker account."
       );
@@ -75,71 +78,6 @@ export default function HeroSectionComp() {
 
     // fileInputRef.current?.click();
   };
-
-  // const handleSubmit = async () => {
-  //   if (!selectedFile || !user) {
-  //     toast.error("Please select a file first");
-  //     return;
-  //   }
-
-  //   // Additional check for employer trying to upload resume
-  //   if (userDetails?.accountType === "employer") {
-  //     toast.error(
-  //       "Employer accounts cannot upload resumes. Please use a job seeker account."
-  //     );
-  //     return;
-  //   }
-
-  //   setIsUploading(true);
-  //   toast.loading("Uploading your resume...");
-
-  //   try {
-  //     // Get the actual file from input
-  //     const file = fileInputRef.current?.files?.[0];
-  //     if (!file) throw new Error("No file selected");
-
-  //     // Upload file to Firebase Storage
-  //     const storageRef = ref(storage, `resumes/${user.uid}/${file.name}`);
-  //     const snapshot = await uploadBytes(storageRef, file);
-  //     const downloadURL = await getDownloadURL(snapshot.ref);
-
-  //     // Get user's name from Users collection - with better error handling
-  //     let userName = "Unknown";
-  //     try {
-  //       const userDoc = await getDoc(doc(db, "Users", user.uid));
-  //       if (userDoc.exists()) {
-  //         userName = userDoc.data()?.name || "Unknown";
-  //         console.log("User document data:", userDoc.data()); // Debugging
-  //       } else {
-  //         console.warn("User document doesn't exist"); // Debugging
-  //       }
-  //     } catch (userDocError) {
-  //       console.error("Error fetching user document:", userDocError);
-  //     }
-
-  //     console.log("Pdf uploaded by UserName is ", userName);
-
-  //     // Save resume details to Resumes collection
-  //     await addDoc(collection(db, "resumes"), {
-  //       id: user.uid,
-  //       userName: userName,
-  //       pdfUrl: downloadURL,
-  //       createdAt: new Date().toISOString(),
-  //       userId: user.uid,
-  //       docId: file.name,
-  //     });
-
-  //     toast.dismiss();
-  //     toast.success("Resume uploaded successfully!");
-  //     setSelectedFile(null);
-  //   } catch (error) {
-  //     console.error("Error uploading resume:", error);
-  //     toast.dismiss();
-  //     toast.error("Failed to upload resume");
-  //   } finally {
-  //     setIsUploading(false);
-  //   }
-  // };
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -313,7 +251,7 @@ export default function HeroSectionComp() {
                 <button
                   onClick={handleUploadClick}
                   disabled={isUploading}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-full font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center gap-3 disabled:opacity-75"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-full font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center gap-3 disabled:opacity-75 cursor-pointer"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -356,7 +294,7 @@ export default function HeroSectionComp() {
                       );
                     }
                   }}
-                  className="bg-white text-gray-800 px-8 py-4 rounded-full font-semibold border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-300 shadow-md hover:shadow-lg inline-flex items-center gap-3"
+                  className="bg-white text-gray-800 px-8 py-4 rounded-full font-semibold border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-300 shadow-md hover:shadow-lg inline-flex items-center gap-3 cursor-pointer"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -372,6 +310,25 @@ export default function HeroSectionComp() {
                     <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                   </svg>
                   Post Your Requirement
+                </button>
+              </Link>
+
+              <Link href="/start-business">
+                <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-full font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center gap-3 disabled:opacity-75 cursor-pointer">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                  </svg>
+                  Starting my Business
                 </button>
               </Link>
             </div>
