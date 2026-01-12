@@ -218,6 +218,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
   const [accountType, setAccountType] = useState("jobSeeker");
   const [jobTitle, setJobTitle] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -336,6 +337,7 @@ export default function RegisterPage() {
         uid: userId,
         name,
         email,
+        contactNumber,
         accountType,
         jobTitle: accountType === "jobSeeker" ? jobTitle : "",
         isAdmin: false,
@@ -440,6 +442,30 @@ export default function RegisterPage() {
             />
           </div>
 
+          {/* Contact Number */}
+          <div>
+            <label
+              htmlFor="contactNumber"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Contact Number
+            </label>
+            <input
+              id="contactNumber"
+              name="contactNumber"
+              type="tel"
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder-gray-500"
+              placeholder="Enter your phone number"
+              value={contactNumber}
+              onChange={(e) => setContactNumber(e.target.value)}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Please enter a valid phone number with country code (e.g.,
+              +919876543210)
+            </p>
+          </div>
+
           {/* Password */}
           <div>
             <label
@@ -513,17 +539,20 @@ export default function RegisterPage() {
                 htmlFor="jobTitle"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Job Title
+                Job Title / Position
               </label>
               <input
                 id="jobTitle"
                 name="jobTitle"
                 type="text"
-                placeholder="e.g., Flutter Developer"
+                placeholder="e.g., Maths Teacher"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder-gray-500"
                 value={jobTitle}
                 onChange={(e) => setJobTitle(e.target.value)}
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Enter your desired job position or field
+              </p>
             </div>
           )}
 
