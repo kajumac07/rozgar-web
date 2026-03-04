@@ -53,6 +53,7 @@ interface User {
   isAdmin: boolean;
   createdAt: string;
   accountType: string;
+  createdAtTimestamp?: Date;
 }
 
 type ActiveTab = "resumes" | "business" | "jobs" | "applied" | "users";
@@ -254,6 +255,43 @@ export default function AdminDashboard() {
       }
     };
 
+    // const fetchAllUsers = async () => {
+    //   try {
+    //     console.log("Fetching all users...");
+    //     const usersSnapshot = await getDocs(collection(db, "Users"));
+    //     const usersData = usersSnapshot.docs.map((doc) => {
+    //       const data = doc.data();
+    //       let createdAt = "Unknown Date";
+
+    //       if (data.createdAt) {
+    //         if (typeof data.createdAt.toDate === "function") {
+    //           createdAt = data.createdAt.toDate().toLocaleDateString();
+    //         } else if (data.createdAt.seconds) {
+    //           createdAt = new Date(
+    //             data.createdAt.seconds * 1000
+    //           ).toLocaleDateString();
+    //         } else if (typeof data.createdAt === "string") {
+    //           createdAt = new Date(data.createdAt).toLocaleDateString();
+    //         }
+    //       }
+
+    //       return {
+    //         id: doc.id,
+    //         email: data.email || "No email",
+    //         name: data.name || "Unknown",
+    //         isAdmin: data.isAdmin || false,
+    //         accountType: data.accountType,
+    //         createdAt,
+    //       };
+    //     });
+
+    //     console.log("Fetched users count:", usersData.length);
+    //     setUsers(usersData);
+    //   } catch (error) {
+    //     console.error("Error fetching users:", error);
+    //   }
+    // };
+
     const fetchAllUsers = async () => {
       try {
         console.log("Fetching all users...");
@@ -261,16 +299,18 @@ export default function AdminDashboard() {
         const usersData = usersSnapshot.docs.map((doc) => {
           const data = doc.data();
           let createdAt = "Unknown Date";
+          let createdAtTimestamp = null;
 
           if (data.createdAt) {
             if (typeof data.createdAt.toDate === "function") {
-              createdAt = data.createdAt.toDate().toLocaleDateString();
+              createdAtTimestamp = data.createdAt.toDate();
+              createdAt = createdAtTimestamp.toLocaleDateString();
             } else if (data.createdAt.seconds) {
-              createdAt = new Date(
-                data.createdAt.seconds * 1000
-              ).toLocaleDateString();
+              createdAtTimestamp = new Date(data.createdAt.seconds * 1000);
+              createdAt = createdAtTimestamp.toLocaleDateString();
             } else if (typeof data.createdAt === "string") {
-              createdAt = new Date(data.createdAt).toLocaleDateString();
+              createdAtTimestamp = new Date(data.createdAt);
+              createdAt = createdAtTimestamp.toLocaleDateString();
             }
           }
 
@@ -281,7 +321,23 @@ export default function AdminDashboard() {
             isAdmin: data.isAdmin || false,
             accountType: data.accountType,
             createdAt,
+            createdAtTimestamp, // Add timestamp for sorting
           };
+        });
+
+        // Sort users by creation date in descending order (most recent first)
+        usersData.sort((a, b) => {
+          // If both have timestamps, compare them
+          if (a.createdAtTimestamp && b.createdAtTimestamp) {
+            return (
+              b.createdAtTimestamp.getTime() - a.createdAtTimestamp.getTime()
+            );
+          }
+          // If one doesn't have a timestamp, put it at the end
+          if (a.createdAtTimestamp && !b.createdAtTimestamp) return -1;
+          if (!a.createdAtTimestamp && b.createdAtTimestamp) return 1;
+          // If neither has a timestamp, maintain original order
+          return 0;
         });
 
         console.log("Fetched users count:", usersData.length);
@@ -710,7 +766,11 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {users.map((user) => (
-                    <tr key={user.id}>
+                    <tr
+                      key={user.id}
+                      onClick={() => router.push(`/admin/users/${user.id}`)}
+                      className="cursor-pointer hover:bg-gray-50"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
                           {user.name}
