@@ -17,15 +17,9 @@ import {
   User,
   Briefcase,
   FileText,
-  MapPin,
-  Clock,
-  DollarSign,
   BookOpen,
   Award,
   Phone,
-  Mail,
-  Home,
-  Calendar,
   FileCheck,
 } from "lucide-react";
 
@@ -40,37 +34,58 @@ interface User {
   jobTitle?: string;
 }
 
+interface UserResumeInfo {
+  resumeUrl: string;
+  resumeFileName: string;
+  resumeUploadedAt: string;
+}
+
 interface ResumeData {
   id: string;
-  userId: string;
-  userName: string;
-  fatherOrHusbandName: string;
-  email: string;
-  contact: string;
-  pdfUrl: string;
-  createdAt: string;
-  docId: string;
-  jobType: string;
-  jobCategory: string;
-  dob: string;
-  qualification: string;
-  experience: string;
-  address: string;
-  gender: string;
-  expectedSalary: string;
-  jobDescription: string;
-  location: string;
-  skills: string;
-  jobTiming: string;
-  fileInfo: {
+  userId?: string;
+  userName?: string;
+  fatherOrHusbandName?: string;
+  email?: string;
+  contact?: string;
+  pdfUrl?: string;
+  createdAt?: string;
+  docId?: string;
+  jobType?: string;
+  jobCategory?: string;
+  dob?: string;
+  qualification?: string;
+  experience?: string;
+  address?: string;
+  gender?: string;
+  expectedSalary?: string;
+  jobDescription?: string;
+  location?: string;
+  skills?: string;
+  jobTiming?: string;
+  fileInfo?: {
     name: string;
     size: number;
     type: string;
   };
 }
 
+const toISODateString = (value: any): string => {
+  if (value?.toDate && typeof value.toDate === "function") {
+    return value.toDate().toISOString();
+  }
+
+  if (typeof value === "string" && value.trim()) {
+    return value;
+  }
+
+  return new Date().toISOString();
+};
+
 export default function UserDetailsScreen() {
   const [user, setUser] = React.useState<User | null>(null);
+  const [userResume, setUserResume] = React.useState<UserResumeInfo | null>(
+    null
+  );
   const [resumes, setResumes] = React.useState<ResumeData[]>([]);
   const [selectedResume, setSelectedResume] = React.useState<ResumeData | null>(
     null
@@ -88,14 +103,29 @@ export default function UserDetailsScreen() {
 
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
+
+          const hasUserResumeFields =
+            "resumeUrl" in userData &&
+            "resumeFileName" in userData &&
+            "resumeUploadedAt" in userData;
+
+          if (hasUserResumeFields && userData.resumeUrl) {
+            setUserResume({
+              resumeUrl: String(userData.resumeUrl),
+              resumeFileName:
+                String(userData.resumeFileName || "").trim() || "Resume",
+              resumeUploadedAt: toISODateString(userData.resumeUploadedAt),
+            });
+          } else {
+            setUserResume(null);
+          }
+
           setUser({
             id: userDocSnap.id,
             email: userData.email || "",
             name: userData.name || "",
             isAdmin: userData.isAdmin || false,
-            createdAt:
-              userData.createdAt?.toDate?.()?.toISOString() ||
-              new Date().toISOString(),
+            createdAt: toISODateString(userData.createdAt),
             accountType: userData.accountType || "",
             contactNumber: userData.contactNumber || "",
             jobTitle: userData.jobTitle || "",
@@ -108,10 +138,14 @@ export default function UserDetailsScreen() {
           );
           const resumesSnapshot = await getDocs(resumesQuery);
 
-          const resumesData = resumesSnapshot.docs.map((doc) => ({
-            ...doc.data(),
-            id: doc.id,
-          })) as ResumeData[];
+          const resumesData = resumesSnapshot.docs.map((resumeDoc) => {
+            const resumeData = resumeDoc.data() as Partial<ResumeData>;
+            return {
+              ...resumeData,
+              id: resumeDoc.id,
+              createdAt: toISODateString(resumeData.createdAt),
+            } as ResumeData;
+          });
 
           setResumes(resumesData);
 
@@ -207,7 +241,9 @@ export default function UserDetailsScreen() {
                     }`}
                   >
                     Resume {index + 1} -{" "}
-                    {new Date(resume.createdAt).toLocaleDateString()}
+                    {new Date(
+                      resume.createdAt || user.createdAt
+                    ).toLocaleDateString()}
                   </button>
                 ))}
               </div>
@@ -297,6 +333,43 @@ export default function UserDetailsScreen() {
 
             {/* Right Column - Resume Details */}
             <div className="lg:col-span-2 space-y-6">
+              {userResume && (
+                <div className="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
+                  <h2 className="text-lg font-semibold text-indigo-800 flex items-center mb-4">
+                    <FileText className="mr-2 h-5 w-5" />
+                    Resume From User Document
+                  </h2>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {userResume.resumeFileName}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Uploaded on{" "}
+                        {new Date(
+                          userResume.resumeUploadedAt
+                        ).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                    <a
+                      href={userResume.resumeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-4 py-2 border border-indigo-300 rounded-md text-sm font-medium text-indigo-600 hover:bg-indigo-50"
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Download
+                    </a>
+                  </div>
+                </div>
+              )}
+
               {selectedResume ? (
                 <>
                   {/* Job Preferences */}
@@ -311,7 +384,7 @@ export default function UserDetailsScreen() {
                           Job Type
                         </p>
                         <p className="text-sm font-medium text-gray-800">
-                          {selectedResume.jobType}
+                          {selectedResume.jobType || "Not specified"}
                         </p>
                       </div>
                       <div className="bg-blue-50 p-3 rounded-lg">
@@ -319,7 +392,7 @@ export default function UserDetailsScreen() {
                           Job Category
                         </p>
                         <p className="text-sm font-medium text-gray-800">
-                          {selectedResume.jobCategory}
+                          {selectedResume.jobCategory || "Not specified"}
                         </p>
                       </div>
                       <div className="bg-blue-50 p-3 rounded-lg">
@@ -327,7 +400,7 @@ export default function UserDetailsScreen() {
                           Expected Salary
                         </p>
                         <p className="text-sm font-medium text-gray-800">
-                          {selectedResume.expectedSalary}
+                          {selectedResume.expectedSalary || "Not specified"}
                         </p>
                       </div>
                       <div className="bg-blue-50 p-3 rounded-lg">
@@ -335,7 +408,7 @@ export default function UserDetailsScreen() {
                           Preferred Location
                         </p>
                         <p className="text-sm font-medium text-gray-800">
-                          {selectedResume.location}
+                          {selectedResume.location || "Not specified"}
                         </p>
                       </div>
                       <div className="bg-blue-50 p-3 rounded-lg">
@@ -343,7 +416,7 @@ export default function UserDetailsScreen() {
                           Job Timing
                         </p>
                         <p className="text-sm font-medium text-gray-800">
-                          {selectedResume.jobTiming}
+                          {selectedResume.jobTiming || "Not specified"}
                         </p>
                       </div>
                     </div>
@@ -361,7 +434,7 @@ export default function UserDetailsScreen() {
                           Qualification
                         </p>
                         <p className="text-sm font-medium text-gray-800 mt-1">
-                          {selectedResume.qualification}
+                          {selectedResume.qualification || "Not specified"}
                         </p>
                       </div>
                     </div>
@@ -375,7 +448,7 @@ export default function UserDetailsScreen() {
                           Professional Experience
                         </p>
                         <p className="text-sm font-medium text-gray-800 mt-1">
-                          {selectedResume.experience}
+                          {selectedResume.experience || "Not specified"}
                         </p>
                       </div>
                     </div>
@@ -388,14 +461,22 @@ export default function UserDetailsScreen() {
                       Skills
                     </h2>
                     <div className="flex flex-wrap gap-2">
-                      {selectedResume.skills.split(",").map((skill, index) => (
-                        <span
-                          key={index}
-                          className="bg-indigo-100 text-indigo-800 text-xs font-medium px-3 py-1 rounded-full"
-                        >
-                          {skill.trim()}
-                        </span>
-                      ))}
+                      {(selectedResume.skills || "")
+                        .split(",")
+                        .filter((skill) => skill.trim())
+                        .map((skill, index) => (
+                          <span
+                            key={index}
+                            className="bg-indigo-100 text-indigo-800 text-xs font-medium px-3 py-1 rounded-full"
+                          >
+                            {skill.trim()}
+                          </span>
+                        ))}
+                      {!selectedResume.skills?.trim() && (
+                        <p className="text-sm text-gray-500">
+                          No skills listed
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -406,7 +487,8 @@ export default function UserDetailsScreen() {
                       Job Description
                     </h2>
                     <p className="text-sm text-gray-700 whitespace-pre-line">
-                      {selectedResume.jobDescription}
+                      {selectedResume.jobDescription ||
+                        "No description provided"}
                     </p>
                   </div>
 
@@ -423,27 +505,37 @@ export default function UserDetailsScreen() {
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">
-                            {selectedResume.fileInfo.name}
+                            {selectedResume.fileInfo?.name || "Resume File"}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {(
-                              selectedResume.fileInfo.size /
-                              1024 /
-                              1024
-                            ).toFixed(2)}{" "}
-                            MB • {selectedResume.fileInfo.type}
+                            {selectedResume.fileInfo?.size
+                              ? `${(
+                                  selectedResume.fileInfo.size /
+                                  1024 /
+                                  1024
+                                ).toFixed(2)} MB`
+                              : "Size not available"}{" "}
+                            •{" "}
+                            {selectedResume.fileInfo?.type ||
+                              "Type not available"}
                           </p>
                         </div>
                       </div>
-                      <a
-                        href={selectedResume.pdfUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center px-4 py-2 border border-indigo-300 rounded-md text-sm font-medium text-indigo-600 hover:bg-indigo-50"
-                      >
-                        <Download className="mr-2 h-4 w-4" />
-                        Download
-                      </a>
+                      {selectedResume.pdfUrl ? (
+                        <a
+                          href={selectedResume.pdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center px-4 py-2 border border-indigo-300 rounded-md text-sm font-medium text-indigo-600 hover:bg-indigo-50"
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          Download
+                        </a>
+                      ) : (
+                        <span className="text-sm text-gray-500">
+                          Download URL not available
+                        </span>
+                      )}
                     </div>
                   </div>
                 </>
@@ -451,10 +543,10 @@ export default function UserDetailsScreen() {
                 <div className="bg-white border border-gray-100 rounded-lg p-8 text-center">
                   <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    No Resume Found
+                    No Resume Found In Resumes Collection
                   </h3>
                   <p className="text-gray-500">
-                    This user hasn't uploaded any resumes yet.
+                    This user has no documents in the `resumes` collection.
                   </p>
                 </div>
               )}
@@ -467,16 +559,15 @@ export default function UserDetailsScreen() {
               {selectedResume ? (
                 <>
                   Resume submitted on:{" "}
-                  {new Date(selectedResume.createdAt).toLocaleDateString(
-                    "en-US",
-                    {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }
-                  )}
+                  {new Date(
+                    selectedResume.createdAt || user.createdAt
+                  ).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </>
               ) : (
                 <>

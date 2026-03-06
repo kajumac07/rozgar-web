@@ -1,215 +1,10 @@
-// "use client";
-
-// import React, { useState } from "react";
-// import { auth, db } from "@/lib/firebase";
-// import { createUserWithEmailAndPassword } from "firebase/auth";
-// import { doc, setDoc } from "firebase/firestore";
-// import { useRouter } from "next/navigation";
-// import { toast } from "react-hot-toast";
-// import Link from "next/link";
-
-// export default function RegisterPage() {
-//   const [name, setName] = useState("");
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const [accountType, setAccountType] = useState("jobSeeker");
-//   const [jobTitle, setJobTitle] = useState("");
-//   const [loading, setLoading] = useState(false);
-//   const router = useRouter();
-
-//   const handleRegister = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setLoading(true);
-
-//     try {
-//       const userCredential = await createUserWithEmailAndPassword(
-//         auth,
-//         email,
-//         password
-//       );
-
-//       await setDoc(doc(db, "Users", userCredential.user.uid), {
-//         uid: userCredential.user.uid,
-//         name,
-//         email,
-//         accountType,
-//         jobTitle: accountType === "jobSeeker" ? jobTitle : "",
-//         isAdmin: false,
-//         createdAt: new Date(),
-//       });
-
-//       toast.success("Account created successfully!");
-//       router.push("/");
-//     } catch (error) {
-//       toast.error("Error creating account");
-//       console.error(error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-//       <div className="max-w-md w-full space-y-6 p-8 bg-white rounded-2xl shadow-xl">
-//         <h2 className="text-center text-3xl font-bold text-gray-900">
-//           Create an Account
-//         </h2>
-
-//         <form className="space-y-5" onSubmit={handleRegister}>
-//           {/* Full Name */}
-//           <div>
-//             <label
-//               htmlFor="name"
-//               className="block text-sm font-medium text-gray-700 mb-1"
-//             >
-//               Full Name
-//             </label>
-//             <input
-//               id="name"
-//               name="name"
-//               type="text"
-//               required
-//               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder-gray-500"
-//               placeholder="Enter your full name"
-//               value={name}
-//               onChange={(e) => setName(e.target.value)}
-//             />
-//           </div>
-
-//           {/* Email */}
-//           <div>
-//             <label
-//               htmlFor="email"
-//               className="block text-sm font-medium text-gray-700 mb-1"
-//             >
-//               Email Address
-//             </label>
-//             <input
-//               id="email"
-//               name="email"
-//               type="email"
-//               required
-//               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder-gray-500"
-//               placeholder="Enter your email"
-//               value={email}
-//               onChange={(e) => setEmail(e.target.value)}
-//             />
-//           </div>
-
-//           {/* Password */}
-//           <div>
-//             <label
-//               htmlFor="password"
-//               className="block text-sm font-medium text-gray-700 mb-1"
-//             >
-//               Password
-//             </label>
-//             <input
-//               id="password"
-//               name="password"
-//               type="password"
-//               required
-//               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder-gray-500"
-//               placeholder="Enter your password"
-//               value={password}
-//               onChange={(e) => setPassword(e.target.value)}
-//             />
-//           </div>
-
-//           {/* Radio Buttons */}
-//           <div>
-//             <label className="block text-sm font-medium text-gray-700 mb-1">
-//               What are you here for?
-//             </label>
-//             <div className="flex items-center gap-4">
-//               <label className="flex items-center gap-2">
-//                 <input
-//                   type="radio"
-//                   name="accountType"
-//                   value="jobSeeker"
-//                   checked={accountType === "jobSeeker"}
-//                   onChange={() => setAccountType("jobSeeker")}
-//                 />
-//                 <span className="text-sm text-gray-800">I want a job</span>
-//               </label>
-
-//               <label className="flex items-center gap-2">
-//                 <input
-//                   type="radio"
-//                   name="accountType"
-//                   value="employer"
-//                   checked={accountType === "employer"}
-//                   onChange={() => setAccountType("employer")}
-//                 />
-//                 <span className="text-sm text-gray-800">
-//                   I want to hire people
-//                 </span>
-//               </label>
-
-//               <label className="flex items-center gap-2">
-//                 <input
-//                   type="radio"
-//                   name="accountType"
-//                   value="business"
-//                   checked={accountType === "business"}
-//                   onChange={() => setAccountType("business")}
-//                 />
-//                 <span className="text-sm text-gray-800">Start a Business</span>
-//               </label>
-//             </div>
-//           </div>
-
-//           {/* Job Title (conditional) */}
-//           {accountType === "jobSeeker" && (
-//             <div>
-//               <label
-//                 htmlFor="jobTitle"
-//                 className="block text-sm font-medium text-gray-700 mb-1"
-//               >
-//                 Job Title
-//               </label>
-//               <input
-//                 id="jobTitle"
-//                 name="jobTitle"
-//                 type="text"
-//                 placeholder="e.g., Flutter Developer"
-//                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder-gray-500"
-//                 value={jobTitle}
-//                 onChange={(e) => setJobTitle(e.target.value)}
-//               />
-//             </div>
-//           )}
-
-//           {/* Submit Button */}
-//           <button
-//             type="submit"
-//             disabled={loading}
-//             className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
-//           >
-//             {loading ? "Creating Account..." : "Sign up"}
-//           </button>
-
-//           <div className="flex justify-center">
-//             <h4>
-//               Already have an account ?{" "}
-//               <Link href={"/login"}>
-//                 <span className="text-indigo-700 cursor-pointer">Login</span>
-//               </Link>
-//             </h4>
-//           </div>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// }
-
 "use client";
 
 import React, { useState, useRef } from "react";
 import { auth, db, storage } from "@/lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
@@ -267,27 +62,26 @@ export default function RegisterPage() {
       setIsUploadingResume(true);
       setUploadProgress(0);
 
-      // Create a storage reference
-      const storageRef = ref(storage, `resumes/${userId}/${file.name}`);
+      const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const storageRef = ref(
+        storage,
+        `resumes/${userId}/${Date.now()}-${safeFileName}`
+      );
+      const uploadTask = uploadBytesResumable(storageRef, file, {
+        contentType: file.type || "application/octet-stream",
+      });
 
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 200);
+      const unsubscribe = uploadTask.on("state_changed", (snapshot) => {
+        const progress = Math.round(
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        );
+        setUploadProgress(progress);
+      });
 
-      // Upload file
-      const snapshot = await uploadBytes(storageRef, file);
+      const snapshot = await uploadTask;
+      unsubscribe();
 
-      // Get download URL
       const downloadURL = await getDownloadURL(snapshot.ref);
-
-      clearInterval(progressInterval);
       setUploadProgress(100);
 
       toast.success("Resume uploaded successfully!");
@@ -303,13 +97,17 @@ export default function RegisterPage() {
   };
 
   // Update user document with resume URL
-  const updateUserWithResume = async (userId: string, resumeUrl: string) => {
+  const updateUserWithResume = async (
+    userId: string,
+    resumeUrl: string,
+    fileName: string
+  ) => {
     try {
       const userRef = doc(db, "Users", userId);
       await updateDoc(userRef, {
         resumeUrl: resumeUrl,
         resumeUploadedAt: new Date(),
-        resumeFileName: resumeFile?.name,
+        resumeFileName: fileName,
       });
     } catch (error) {
       console.error("Error updating user with resume:", error);
@@ -320,6 +118,12 @@ export default function RegisterPage() {
   // Handle registration
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (accountType === "jobSeeker" && !resumeFile) {
+      toast.error("Resume is required for job seekers.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -350,16 +154,14 @@ export default function RegisterPage() {
       if (accountType === "jobSeeker" && resumeFile) {
         try {
           const resumeUrl = await uploadResumeToStorage(userId, resumeFile);
-          await updateUserWithResume(userId, resumeUrl);
+          await updateUserWithResume(userId, resumeUrl, resumeFile.name);
         } catch (uploadError) {
           console.error(
             "Resume upload failed, but account was created:",
             uploadError
           );
-          // Don't fail the registration if resume upload fails
-          toast.error(
-            "Account created but resume upload failed. You can upload it later."
-          );
+          toast.error("Account created, but resume upload failed. Try again.");
+          return;
         }
       }
 
@@ -560,7 +362,7 @@ export default function RegisterPage() {
           {accountType === "jobSeeker" && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Upload Resume (Optional)
+                Upload Resume
               </label>
 
               <input
