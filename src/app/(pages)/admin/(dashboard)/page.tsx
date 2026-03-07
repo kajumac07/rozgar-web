@@ -13,6 +13,7 @@ import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContexts";
 import { useRouter } from "next/navigation";
 import { UserDetails } from "@/types/userDetails";
+import { Download } from "lucide-react";
 
 interface Resume {
   id: string;
@@ -53,6 +54,8 @@ interface User {
   isAdmin: boolean;
   createdAt: string;
   accountType: string;
+  contactNumber: string;
+  resumeUrl: string;
   createdAtTimestamp?: Date;
 }
 
@@ -255,43 +258,6 @@ export default function AdminDashboard() {
       }
     };
 
-    // const fetchAllUsers = async () => {
-    //   try {
-    //     console.log("Fetching all users...");
-    //     const usersSnapshot = await getDocs(collection(db, "Users"));
-    //     const usersData = usersSnapshot.docs.map((doc) => {
-    //       const data = doc.data();
-    //       let createdAt = "Unknown Date";
-
-    //       if (data.createdAt) {
-    //         if (typeof data.createdAt.toDate === "function") {
-    //           createdAt = data.createdAt.toDate().toLocaleDateString();
-    //         } else if (data.createdAt.seconds) {
-    //           createdAt = new Date(
-    //             data.createdAt.seconds * 1000
-    //           ).toLocaleDateString();
-    //         } else if (typeof data.createdAt === "string") {
-    //           createdAt = new Date(data.createdAt).toLocaleDateString();
-    //         }
-    //       }
-
-    //       return {
-    //         id: doc.id,
-    //         email: data.email || "No email",
-    //         name: data.name || "Unknown",
-    //         isAdmin: data.isAdmin || false,
-    //         accountType: data.accountType,
-    //         createdAt,
-    //       };
-    //     });
-
-    //     console.log("Fetched users count:", usersData.length);
-    //     setUsers(usersData);
-    //   } catch (error) {
-    //     console.error("Error fetching users:", error);
-    //   }
-    // };
-
     const fetchAllUsers = async () => {
       try {
         console.log("Fetching all users...");
@@ -320,6 +286,8 @@ export default function AdminDashboard() {
             name: data.name || "Unknown",
             isAdmin: data.isAdmin || false,
             accountType: data.accountType,
+            contactNumber: data.contactNumber || "N/A",
+            resumeUrl: data.resumeUrl || "N/A",
             createdAt,
             createdAtTimestamp, // Add timestamp for sorting
           };
@@ -754,13 +722,16 @@ export default function AdminDashboard() {
                       Email
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Role
+                      Ph.No.
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Account Type
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Joined Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
                     </th>
                   </tr>
                 </thead>
@@ -782,15 +753,7 @@ export default function AdminDashboard() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            user.isAdmin
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-blue-100 text-blue-800"
-                          }`}
-                        >
-                          {user.isAdmin ? "Admin" : "User"}
-                        </span>
+                        <span>{user.contactNumber}</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
@@ -803,6 +766,28 @@ export default function AdminDashboard() {
                         <div className="text-sm text-gray-500">
                           {user.createdAt}
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {user.resumeUrl && user.resumeUrl !== "N/A" ? (
+                          <a
+                            href={user.resumeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex text-indigo-600 hover:text-indigo-900"
+                            aria-label={`Download resume for ${user.name}`}
+                            title="Download resume"
+                          >
+                            <Download size={16} />
+                          </a>
+                        ) : (
+                          <span
+                            className="text-sm text-gray-500"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            N/A
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))}
